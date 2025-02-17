@@ -1,16 +1,29 @@
 import { Controller, Get } from '@nestjs/common';
-import { VersionRepositoryService } from './version-repository.service';
+import { FirebaseService } from '../firebase.service';
 
 @Controller('ping')
 export class PingController {
-  constructor(private readonly versionRepository: VersionRepositoryService) {}
+  constructor(private readonly firebaseService: FirebaseService) {}
 
   @Get()
   async ping() {
-    console.log('Received ping request');
+    console.log('📡 Requête ping reçue');
+    let databaseStatus = 'KO';
+
+    try {
+      // Vérifie la connexion à Firestore
+      const firestore = this.firebaseService.getFirestore();
+      await firestore.collection('test').get(); 
+
+    } catch (error) {
+      console.error('❌ Erreur de connexion à Firebase:', error);
+    }
+
     return {
-      response: 'pong',
-      version: await this.versionRepository.getVersion(),
+      status: databaseStatus === 'OK' ? 'OK' : 'Partial',
+      details: {
+        database: databaseStatus,
+      },
     };
   }
 }
