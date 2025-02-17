@@ -11,10 +11,10 @@ export class PingController {
     let databaseStatus = 'KO';
 
     try {
-      // Vérifie la connexion à Firestore
-      const firestore = this.firebaseService.getFirestore();
-      await firestore.collection('test').get(); 
-
+      const isConnected = await this.firebaseService.checkFirestoreConnection();
+      if (isConnected) {
+        databaseStatus = 'OK';
+      }
     } catch (error) {
       console.error('❌ Erreur de connexion à Firebase:', error);
     }
