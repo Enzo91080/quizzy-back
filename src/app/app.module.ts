@@ -9,7 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PingModule } from './ping/ping.module';
 import { PokemonsController } from './pokemon/pokemons.controller';
-import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
 import { FirebaseService } from './firebase.service';
@@ -21,8 +21,9 @@ import { FirebaseService } from './firebase.service';
       googleApplicationCredential: 'src/assets/quizzy-back-firebase-key.json',
     }),
     AuthModule,
+    UsersModule,
   ],
-  controllers: [AppController, PokemonsController, UsersController],
+  controllers: [AppController, PokemonsController],
   providers: [AppService, FirebaseService],
   exports: [FirebaseService],
 })

@@ -1,12 +1,23 @@
-import { Controller, Post, Req } from '@nestjs/common';
+import { Controller, Post, Req, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { RequestWithUser } from '../modules/auth/model/request-with-user';
 import { Auth } from '../modules/auth/auth.decorator';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
   @Post()
   @Auth()
-  create(@Req() request: RequestWithUser) {
-    console.log(request.user.uid);
+  @HttpCode(HttpStatus.CREATED)
+  async create(
+    @Req() request: RequestWithUser, 
+    @Body('username') username: string,
+    @Body('email') email: string,
+    @Body('password') password: string
+  ) {
+    const uid = request.user.uid;
+    console.log(`Creating user with UID: ${uid}, username: ${username}, email: ${email}`);
+    await this.usersService.createUser(uid, username, email, password);
   }
 }
