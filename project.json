@@ -1,0 +1,44 @@
+{
+  "name": "quizzy-back",
+  "$schema": "./node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "options": {
+        "webpackConfig": "webpack.config.js",
+        "main": "src/main.ts",
+        "tsConfig": "tsconfig.app.json",
+        "optimization": false,
+        "outputHashing": "none",
+        "sourceMap": true,
+        "outputPath": "dist/",
+        "compiler": "tsc",
+        "target": "node"
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "quizzy-back:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "quizzy-back:build:development"
+        },
+        "production": {
+          "buildTarget": "quizzy-back:build:production"
+        }
+      },
+      "dependsOn": [
+        {
+          "projects": [],
+          "target": "build"
+        }
+      ]
+    }
+  }
+}
