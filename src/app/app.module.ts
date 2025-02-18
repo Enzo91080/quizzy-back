@@ -13,6 +13,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
 import { VersionRepositoryService } from './ping/version-repository.service';
+import { QuizzController } from './quizz/quizz.controller';
+import { QuizzModule } from './quizz/quizz.module';
 
 @Module({
   imports: [
@@ -22,8 +24,9 @@ import { VersionRepositoryService } from './ping/version-repository.service';
     }),
     AuthModule,
     UsersModule,
+    QuizzModule,
   ],
-  controllers: [AppController, PokemonsController],
+  controllers: [AppController, PokemonsController, QuizzController],
   providers: [AppService, VersionRepositoryService],
   exports: [VersionRepositoryService],
 })
