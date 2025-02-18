@@ -12,7 +12,7 @@ import { PokemonsController } from './pokemon/pokemons.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
-import { FirebaseService } from './firebase.service';
+import { VersionRepositoryService } from './ping/version-repository.service';
 
 @Module({
   imports: [
@@ -24,8 +24,8 @@ import { FirebaseService } from './firebase.service';
     UsersModule,
   ],
   controllers: [AppController, PokemonsController],
-  providers: [AppService, FirebaseService],
-  exports: [FirebaseService],
+  providers: [AppService, VersionRepositoryService],
+  exports: [VersionRepositoryService],
 })
 export class AppModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {

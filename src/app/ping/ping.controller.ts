@@ -1,9 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
-import { FirebaseService } from '../firebase.service';
+import { VersionRepositoryService } from './version-repository.service';
 
 @Controller('ping')
 export class PingController {
-  constructor(private readonly firebaseService: FirebaseService) {}
+  constructor(private readonly versionRepository: VersionRepositoryService) {}
 
   @Get()
   async ping() {
@@ -11,7 +11,7 @@ export class PingController {
     let databaseStatus = 'KO';
 
     try {
-      const isConnected = await this.firebaseService.checkFirestoreConnection();
+      const isConnected = await this.versionRepository.getVersion();
       if (isConnected) {
         databaseStatus = 'OK';
       }
@@ -24,6 +24,7 @@ export class PingController {
       details: {
         database: databaseStatus,
       },
+      version: await this.versionRepository.getVersion(),
     };
   }
 }
