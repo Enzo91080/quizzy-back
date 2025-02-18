@@ -14,4 +14,9 @@ export class UsersService {
     await this.db.collection('users').doc(uid).set({ username });
     console.log(`User with UID: ${uid}, Username: ${username} stored successfully.`);
   }
+  async getUser(uid: string): Promise<any> {
+    const user = await this.db.collection('users').doc(uid).get();
+    return user.data();
+  }
+
 } 
