@@ -13,11 +13,10 @@ export class UsersController {
   async create(
     @Req() request: RequestWithUser, 
     @Body('username') username: string,
-    @Body('email') email: string,
-    @Body('password') password: string
   ) {
     const uid = request.user.uid;
-    console.log(`Creating user with UID: ${uid}, username: ${username}, email: ${email}`);
-    await this.usersService.createUser(uid, username, email, password);
+    console.log(`Creating user with UID: ${uid}, username: ${username}`);
+    await this.usersService.createUser(uid, username);
   }
+
 }
