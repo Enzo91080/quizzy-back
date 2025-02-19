@@ -42,3 +42,4 @@ Thumbs.db
 .nx/workspace-data
 
 src/assets/quizzy-back-firebase-key.json
+.env/*
