@@ -1,5 +1,5 @@
 export class CreateQuizzDto {
-    id: number;
+    id: string;
     title: string;
     description:string;
 }

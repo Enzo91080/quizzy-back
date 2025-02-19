@@ -8,9 +8,17 @@ import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 export class QuizzService {
   constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) {}
 
-  create(createQuizzDto: CreateQuizzDto, userId: string) {
+  async create(createQuizzDto: CreateQuizzDto, userId: string): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
-    return quizzesCollection.add({ ...createQuizzDto, userId });
+
+    // Ajouter un quiz en Firestore
+    const quizRef = await quizzesCollection.add({
+      title: createQuizzDto.title,
+      description: createQuizzDto.description,
+      userId,
+    });
+
+    return quizRef.id; // Retourne uniquement l'ID généré
   }
 
   async findAll(userId: string) {
