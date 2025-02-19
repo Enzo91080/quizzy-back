@@ -1,8 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { QuizzService } from './quizz.service';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
 import { UpdateQuizzDto } from './dto/update-quizz.dto';
 import { QuizzDto } from './dto/quizz.dto';
+import { Auth } from '../modules/auth/auth.decorator';
+import { RequestWithUser } from '../modules/auth/model/request-with-user';
 
 interface GetAllQuizzResponse {
   data: QuizzDto[];
@@ -18,16 +31,32 @@ export class QuizzController {
   constructor(private readonly quizzService: QuizzService) {}
 
   @Post()
-  create(@Body() createQuizzDto: CreateQuizzDto) {
-    return this.quizzService.create(createQuizzDto);
+  @Auth()
+  async create(
+    @Body() createQuizzDto: CreateQuizzDto,
+    @Req() request: RequestWithUser
+  ) {
+    try {
+      const uid = request.user?.uid;
+      if (!uid) {
+        throw new UnauthorizedException('Utilisateur non authentifié');
+      }
+      return await this.quizzService.create(createQuizzDto, uid);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erreur lors de la création du quiz'
+      );
+    }
   }
 
   @Get()
-  async findAll(): Promise<GetAllQuizzResponse> {
-    const quizzes = await this.quizzService.findAll();
+  @Auth()
+  async findAll(@Req() request: RequestWithUser): Promise<GetAllQuizzResponse> {
+    const userId = request.user.uid;
+    const quizzes = await this.quizzService.findAll(userId);
     return { data: quizzes as QuizzDto[] };
   }
-  
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.quizzService.findOne(id);
@@ -42,5 +71,4 @@ export class QuizzController {
   remove(@Param('id') id: string) {
     return this.quizzService.remove(id);
   }
-  
 }

@@ -8,15 +8,15 @@ import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 export class QuizzService {
   constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) {}
 
-  create(createQuizzDto: CreateQuizzDto) {
+  create(createQuizzDto: CreateQuizzDto, userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
-    return quizzesCollection.add(createQuizzDto);
+    return quizzesCollection.add({ ...createQuizzDto, userId });
   }
 
-  async findAll() {
+  async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
-    const quizzes = (await quizzesCollection.get()).docs;
-    return quizzes.map((quiz) => quiz.data());
+    const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
+    return userQuizzes.docs.map((quiz) => quiz.data());
   }
 
   async findOne(id: string) {
