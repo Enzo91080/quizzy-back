@@ -56,7 +56,7 @@ export class QuizzController {
       const quizUrl = `${request.protocol}://${request.get('host')}/quizz/${quizId}`;
 
       res.setHeader('Location', quizUrl);
-      return res.status(201).end(); // Répondre avec 201 Created et aucun corps
+      return res.status(201).end(); // Répondre avec 201 quiz cree
     } catch (error) {
       throw new InternalServerErrorException('Erreur lors de la création du quiz');
     }
