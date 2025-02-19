@@ -12,7 +12,9 @@ import { PokemonsController } from './pokemon/pokemons.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
-import { FirebaseService } from './firebase.service';
+import { VersionRepositoryService } from './ping/version-repository.service';
+import { QuizzController } from './quizz/quizz.controller';
+import { QuizzModule } from './quizz/quizz.module';
 
 @Module({
   imports: [
@@ -22,10 +24,11 @@ import { FirebaseService } from './firebase.service';
     }),
     AuthModule,
     UsersModule,
+    QuizzModule,
   ],
-  controllers: [AppController, PokemonsController],
-  providers: [AppService, FirebaseService],
-  exports: [FirebaseService],
+  controllers: [AppController, PokemonsController, QuizzController],
+  providers: [AppService, VersionRepositoryService],
+  exports: [VersionRepositoryService],
 })
 export class AppModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
