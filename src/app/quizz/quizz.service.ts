@@ -17,8 +17,8 @@ export class QuizzService {
       ...createQuizzDto,
       userId,
       questions: createQuizzDto.questions.map((question) => ({
-        ...question,
         id: this.fa.firestore.collection('quizzes').doc().id, // Générer un ID unique pour chaque question
+        ...question,
       })),
     });
 
@@ -100,6 +100,39 @@ export class QuizzService {
     } catch (error) {
       console.error('Erreur lors de l’ajout de la question :', error);
       throw new Error('Erreur lors de l’ajout de la question');
+    }
+  }
+
+  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: Question) {
+    const quizzesCollection = this.fa.firestore.collection('quizzes');
+    const quizDoc = await quizzesCollection.doc(quizId).get();
+
+    // Vérifier si le quiz existe
+    if (!quizDoc.exists) {
+      return false; // Permet au contrôleur de renvoyer un 404
+    }
+
+    const quizData = quizDoc.data();
+
+    // Vérifier si l'utilisateur est bien le propriétaire du quiz
+    if (quizData.userId !== userId) {
+      return false; // Permet au contrôleur de renvoyer un 404
+    }
+
+    // Mettre à jour la question dans la liste des questions
+    const updatedQuestions = quizData.questions.map((question: Question) => {
+      if (question.id === questionId) {
+        return { ...question, ...questionData };
+      }
+      return question;
+    });
+
+    try {
+      await quizzesCollection.doc(quizId).update({ questions: updatedQuestions });
+      return true; // Indique que la mise à jour a été effectuée
+    } catch (error) {
+      console.error(`Erreur lors de la mise à jour de la question ${questionId} du quiz ${quizId}:`, error);
+      throw new Error('Erreur lors de la mise à jour de la question');
     }
   }
 

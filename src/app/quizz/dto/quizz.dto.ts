@@ -1,4 +1,4 @@
 export class QuizzDto {
-  id: number;
+  id: string;
   title: string;
 } 
