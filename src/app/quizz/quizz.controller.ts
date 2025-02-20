@@ -5,7 +5,7 @@ import {
   Body,
   Patch,
   Render,
-  Res ,
+  Res,
   Param,
   Delete,
   Req,
@@ -34,7 +34,7 @@ interface Quizz {
 
 @Controller('quizz')
 export class QuizzController {
-  constructor(private readonly quizzService: QuizzService) {}
+  constructor(private readonly quizzService: QuizzService) { }
 
 
   @Post()
@@ -58,7 +58,9 @@ export class QuizzController {
       res.setHeader('Location', quizUrl);
       return res.status(201).end(); // Répondre avec 201 quiz cree
     } catch (error) {
-      throw new InternalServerErrorException('Erreur lors de la création du quiz');
+      throw new InternalServerErrorException(
+        'Erreur lors de la création du quiz'
+      );
     }
   }
 
@@ -77,9 +79,40 @@ export class QuizzController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuizzDto: UpdateQuizzDto) {
-    return this.quizzService.update(id, updateQuizzDto);
+  @Auth()
+  async updateTitle(
+    @Param('id') id: string,
+    @Body() operations: { op: string; path: string; value: string }[],
+    @Req() request: RequestWithUser,
+    @Res() res: Response
+  ) {
+    try {
+      // Vérification du format de l'opération
+      const operation = operations.find(op => op.op === 'replace' && op.path === '/title');
+      if (!operation || !operation.value) {
+        return res.status(400).json({ message: 'Invalid operation: missing or incorrect title update' });
+      }
+
+      const userId = request.user.uid;
+      const updated = await this.quizzService.updateTitle(id, userId, operation.value);
+
+      if (!updated) {
+        return res.status(404).json({ message: 'Quiz not found or does not belong to user' });
+      }
+
+      return res.status(204).end();
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Error updating quiz title' });
+    }
   }
+
+
+
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateQuizzDto: UpdateQuizzDto) {
+  //   return this.quizzService.update(id, updateQuizzDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

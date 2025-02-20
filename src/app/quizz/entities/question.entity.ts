@@ -1,15 +1,9 @@
-import { Quiz } from './quiz.entity';
+import { Quizz } from "./quizz.entity";
 
 export class Question {
-    id: string;
-
-    question: string;
-    
-
-    choix: string[];
-  
-    answers: string[];
-  
-    
-    quiz: Quiz;
+    title: string;
+    answers: {
+        title: string;
+        isCorrect: boolean;
+    }[];
 }
