@@ -16,6 +16,10 @@ export class QuizzService {
     const quizRef = await quizzesCollection.add({
       ...createQuizzDto,
       userId,
+      questions: createQuizzDto.questions.map((question) => ({
+        ...question,
+        id: this.fa.firestore.collection('quizzes').doc().id, // Générer un ID unique pour chaque question
+      })),
     });
 
     return quizRef.id; // Retourne uniquement l'ID généré
@@ -66,35 +70,38 @@ export class QuizzService {
   async addQuestionToQuiz(
     quizId: string,
     userId: string,
-    questionData: Question
+    questionData: Question, // Exclure l'ID car il sera généré
   ) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
-  
+
     // Vérifier si le quiz existe
     if (!quizDoc.exists) {
       throw new Error('Quiz not found or unauthorized');
     }
-  
+
     const quizData = quizDoc.data();
-  
+
     // Vérifier si l'utilisateur est bien le propriétaire du quiz
     if (quizData.userId !== userId) {
       throw new Error('Quiz not found or unauthorized');
     }
-  
-    // Ajouter la nouvelle question
-    const updatedQuestions = quizData.questions ? [...quizData.questions, questionData] : [questionData];
-  
+
+    // Générer un ID unique pour la nouvelle question
+    const questionId = this.fa.firestore.collection('quizzes').doc().id;
+
+    // Ajouter la nouvelle question avec l'ID généré
+    const newQuestion: Question = { id: questionId, ...questionData };
+    const updatedQuestions = quizData.questions ? [...quizData.questions, newQuestion] : [newQuestion];
+
     try {
       await quizzesCollection.doc(quizId).update({ questions: updatedQuestions });
-      return quizId; // Retourne l'ID du quiz pour construire l'URL
+      return questionId; // Retourner l'ID de la question ajoutée
     } catch (error) {
       console.error('Erreur lors de l’ajout de la question :', error);
       throw new Error('Erreur lors de l’ajout de la question');
     }
   }
-
 
   remove(id: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');

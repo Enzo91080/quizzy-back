@@ -20,6 +20,7 @@ import { Auth } from '../modules/auth/auth.decorator';
 import { RequestWithUser } from '../modules/auth/model/request-with-user';
 import { join } from 'path';
 import { Response } from 'express';
+import { Question } from './entities/question.entity';
 
 
 
@@ -111,7 +112,7 @@ export class QuizzController {
   @Auth()
   async createNewQuestion(
     @Param('id') id: string,
-    @Body() questionData: { title: string; answers: { title: string; isCorrect: boolean }[] },
+    @Body() questionData: Question,
     @Req() request: RequestWithUser,
     @Res() res: Response
   ) {
@@ -120,19 +121,19 @@ export class QuizzController {
       if (!userId) {
         throw new UnauthorizedException('Utilisateur non authentifié');
       }
-  
+
       // Ajouter la question au quiz via le service
-      const updatedQuizId = await this.quizzService.addQuestionToQuiz(id, userId, questionData);
-  
-      if (!updatedQuizId) {
+      const questionId = await this.quizzService.addQuestionToQuiz(id, userId, questionData);
+
+      if (!questionId) {
         throw new InternalServerErrorException('Impossible d’ajouter la question');
       }
-  
-      // Générer l'URL de la ressource créée
-      const questionUrl = `${request.protocol}://${request.get('host')}/quizz/${id}/questions`;
-  
+
+      // Générer l'URL de la nouvelle ressource créée
+      const questionUrl = `${request.protocol}://${request.get('host')}/quizz/${id}/questions/${questionId}`;
+
       res.setHeader('Location', questionUrl);
-      return res.status(201).end(); // Répondre avec 201 Created
+      return res.status(201).json({ id: questionId, message: 'Question ajoutée avec succès' });
     } catch (error) {
       if (error.message === 'Quiz not found or unauthorized') {
         throw new UnauthorizedException('Quiz non trouvé ou accès interdit');
@@ -140,6 +141,7 @@ export class QuizzController {
       throw new InternalServerErrorException('Erreur lors de l’ajout de la question');
     }
   }
+
 
 
 
