@@ -3,13 +3,11 @@ import { Response } from 'express';
 import { Auth } from '../modules/auth/auth.decorator';
 import { RequestWithUser } from '../modules/auth/model/request-with-user';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
-import { QuizzDto } from './dto/quizz.dto';
+import { FindQuizzDto } from './dto/find-quizz';
 import { Question } from './entities/question.entity';
 import { QuizzService } from './quizz.service';
 
-interface GetAllQuizzResponse {
-  data: QuizzDto[];
-}
+
 
 @Controller('quizz')
 export class QuizzController {
@@ -78,10 +76,15 @@ export class QuizzController {
 
   @Get()
   @Auth()
-  async findAll(@Req() request: RequestWithUser): Promise<GetAllQuizzResponse> {
+  async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[]; _links: { create: string } }> {
     const userId = request.user.uid;
     const quizzes = await this.quizzService.findAll(userId);
-    return { data: quizzes as QuizzDto[] };
+    return {
+      data: quizzes as FindQuizzDto[],
+      _links: {
+        create: `${request.protocol}://${request.get('host')}/api/quizz`
+      }
+    };
   }
 
   @Get(':id')
