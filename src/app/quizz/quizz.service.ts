@@ -4,6 +4,7 @@ import { UpdateQuizzDto } from './dto/update-quizz.dto';
 import * as admin from 'firebase-admin';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { Question } from './entities/question.entity';
+import { FindQuizzDto } from './dto/find-quizz';
 
 @Injectable()
 export class QuizzService {
@@ -28,7 +29,7 @@ export class QuizzService {
   async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
-    return userQuizzes.docs.map((quiz) => quiz.data());
+    return userQuizzes.docs.map((quiz) => ({ ...quiz.data(), id: quiz.id }));
   }
 
   async findOne(id: string) {
@@ -150,4 +151,33 @@ export class QuizzService {
         throw new Error(`Erreur lors de la suppression du quiz.`);
       });
   }
+
+  canStartQuiz(quiz: FindQuizzDto): boolean {
+    if (!quiz.title || quiz.title.trim() === '') {
+      return false; // Le titre est vide
+    }
+
+    if (!quiz.questions || quiz.questions.length === 0) {
+      return false; // Pas de questions
+    }
+
+    for (const question of quiz.questions) {
+      if (!question.title || question.title.trim() === '') {
+        return false; // Question sans titre
+      }
+
+      if (!question.answers || question.answers.length < 2) {
+        return false; // Moins de deux réponses
+      }
+
+      const correctAnswers = question.answers.filter(answer => answer.isCorrect);
+      if (correctAnswers.length !== 1) {
+        return false; // Pas exactement une réponse correcte
+      }
+    }
+
+    return true;
+  }
+
+
 }

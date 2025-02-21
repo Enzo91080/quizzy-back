@@ -29,6 +29,7 @@ export class QuizzController {
       const quizId = await this.quizzService.create(createQuizzDto, uid);
 
       // Générer l'URL complète du quiz
+
       const quizUrl = `${request.protocol}://${request.get('host')}/quizz/${quizId}`;
 
       res.setHeader('Location', quizUrl);
@@ -76,16 +77,31 @@ export class QuizzController {
 
   @Get()
   @Auth()
-  async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[]; _links: { create: string } }> {
+  async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[] }> {
     const userId = request.user.uid;
     const quizzes = await this.quizzService.findAll(userId);
+
+    const baseUrl = `${request.protocol}://${request.get('host')}/api/quizz`;
+
     return {
-      data: quizzes as FindQuizzDto[],
-      _links: {
-        create: `${request.protocol}://${request.get('host')}/api/quizz`
-      }
+      data: quizzes.map(quiz => {
+        // Vérification si le quiz est démarrable
+        const isStartable = this.quizzService.canStartQuiz(quiz as FindQuizzDto);
+
+        return {
+          ...quiz,
+          _links: {
+            create: `${baseUrl}`,
+            ...(isStartable ? { start: `${baseUrl}/${quiz.id}/start` } : {}) // Ajout conditionnel du lien start
+          }
+        };
+      }) as FindQuizzDto[], // 👈 Cast explicite
     };
   }
+
+
+
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
