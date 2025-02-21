@@ -8,7 +8,6 @@ import { FirebaseModule } from 'nestjs-firebase';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PingModule } from './ping/ping.module';
-import { PokemonsController } from './pokemon/pokemons.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthMiddleware } from './modules/auth/auth.middleware';
@@ -20,8 +19,8 @@ import { join } from 'path';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-        rootPath: join(__dirname, '..', 'public'), // Dossier contenant les fichiers HTML
-      }),
+      rootPath: join(__dirname, '..', 'public'), // Dossier contenant les fichiers HTML
+    }),
     PingModule,
     FirebaseModule.forRoot({
       googleApplicationCredential: 'src/assets/quizzy-back-firebase-key.json',
@@ -32,7 +31,6 @@ import { join } from 'path';
   ],
   controllers: [
     AppController,
-    PokemonsController,
     QuizzController,
   ],
   providers: [AppService, VersionRepositoryService],

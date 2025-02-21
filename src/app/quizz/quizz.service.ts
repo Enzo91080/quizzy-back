@@ -5,6 +5,8 @@ import * as admin from 'firebase-admin';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { Question } from './entities/question.entity';
 import { FindQuizzDto } from './dto/find-quizz';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { UpdateQuestionDto } from './dto/update-question.dto';
 
 @Injectable()
 export class QuizzService {
@@ -71,7 +73,7 @@ export class QuizzService {
   async addQuestionToQuiz(
     quizId: string,
     userId: string,
-    questionData: Question, // Exclure l'ID car il sera généré
+    questionData: CreateQuestionDto, // Exclure l'ID car il sera généré
   ) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
@@ -92,7 +94,7 @@ export class QuizzService {
     const questionId = this.fa.firestore.collection('quizzes').doc().id;
 
     // Ajouter la nouvelle question avec l'ID généré
-    const newQuestion: Question = { id: questionId, ...questionData };
+    const newQuestion: CreateQuestionDto = { id: questionId, ...questionData };
     const updatedQuestions = quizData.questions ? [...quizData.questions, newQuestion] : [newQuestion];
 
     try {
@@ -104,7 +106,7 @@ export class QuizzService {
     }
   }
 
-  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: Question) {
+  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: UpdateQuestionDto) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
 
@@ -121,7 +123,7 @@ export class QuizzService {
     }
 
     // Mettre à jour la question dans la liste des questions
-    const updatedQuestions = quizData.questions.map((question: Question) => {
+    const updatedQuestions = quizData.questions.map((question: UpdateQuestionDto) => {
       if (question.id === questionId) {
         return { ...question, ...questionData };
       }

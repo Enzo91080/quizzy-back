@@ -14,6 +14,7 @@
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/serve-static": "4.0.2",
+    "@nestjs/swagger": "^8.1.1",
     "axios": "^1.7.9",
     "express": "^4.21.2",
     "nestjs-firebase": "^10.5.1",
