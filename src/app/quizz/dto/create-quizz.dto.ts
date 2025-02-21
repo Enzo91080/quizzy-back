@@ -1,8 +1,17 @@
-import { Question } from "../entities/question.entity";
+import { ApiProperty } from "@nestjs/swagger";
+import { CreateQuestionDto } from "./create-question.dto";
 
 export class CreateQuizzDto {
-    id: string;
+    @ApiProperty()
     title: string;
+
+    @ApiProperty()
     description: string;
-    questions: Question[];
+
+    @ApiProperty({ type: () => [CreateQuestionDto] })
+    questions: CreateQuestionDto[];
 }
+
+
+
+

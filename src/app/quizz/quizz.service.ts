@@ -3,6 +3,9 @@ import { CreateQuizzDto } from './dto/create-quizz.dto';
 import { UpdateQuizzDto } from './dto/update-quizz.dto';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { Question } from './entities/question.entity';
+import { FindQuizzDto } from './dto/find-quizz';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { UpdateQuestionDto } from './dto/update-question.dto';
 
 @Injectable()
 export class QuizzService {
@@ -29,7 +32,7 @@ export class QuizzService {
   async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
-    return userQuizzes.docs.map((quiz) => quiz.data());
+    return userQuizzes.docs.map((quiz) => ({ ...quiz.data(), id: quiz.id }));
   }
 
   // Trouver un quiz par ID
@@ -75,7 +78,7 @@ export class QuizzService {
   async addQuestionToQuiz(
     quizId: string,
     userId: string,
-    questionData: Question, // Exclure l'ID car il sera généré
+    questionData: CreateQuestionDto, // Exclure l'ID car il sera généré
   ) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
@@ -96,7 +99,7 @@ export class QuizzService {
     const questionId = this.fa.firestore.collection('quizzes').doc().id;
 
     // Ajouter la nouvelle question avec l'ID généré
-    const newQuestion: Question = { id: questionId, ...questionData };
+    const newQuestion: CreateQuestionDto = { id: questionId, ...questionData };
     const updatedQuestions = quizData.questions ? [...quizData.questions, newQuestion] : [newQuestion];
 
     try {
@@ -108,8 +111,7 @@ export class QuizzService {
     }
   }
 
-  // Mettre à jour une question
-  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: Question) {
+  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: UpdateQuestionDto) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
 
@@ -126,7 +128,7 @@ export class QuizzService {
     }
 
     // Mettre à jour la question dans la liste des questions
-    const updatedQuestions = quizData.questions.map((question: Question) => {
+    const updatedQuestions = quizData.questions.map((question: UpdateQuestionDto) => {
       if (question.id === questionId) {
         return { ...question, ...questionData };
       }
@@ -157,4 +159,33 @@ export class QuizzService {
         throw new Error(`Erreur lors de la suppression du quiz.`);
       });
   }
+
+  canStartQuiz(quiz: FindQuizzDto): boolean {
+    if (!quiz.title || quiz.title.trim() === '') {
+      return false; // Le titre est vide
+    }
+
+    if (!quiz.questions || quiz.questions.length === 0) {
+      return false; // Pas de questions
+    }
+
+    for (const question of quiz.questions) {
+      if (!question.title || question.title.trim() === '') {
+        return false; // Question sans titre
+      }
+
+      if (!question.answers || question.answers.length < 2) {
+        return false; // Moins de deux réponses
+      }
+
+      const correctAnswers = question.answers.filter(answer => answer.isCorrect);
+      if (correctAnswers.length !== 1) {
+        return false; // Pas exactement une réponse correcte
+      }
+    }
+
+    return true;
+  }
+
+
 }
