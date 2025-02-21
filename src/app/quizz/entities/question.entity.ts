@@ -1,4 +1,4 @@
-import { Quiz } from './quiz.entity';
+
 
 export class Question {
     id: string;
@@ -11,5 +11,4 @@ export class Question {
     answers: string[];
   
     
-    quiz: Quiz;
 }

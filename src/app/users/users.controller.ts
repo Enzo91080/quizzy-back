@@ -18,6 +18,7 @@ export class UsersController {
     console.log(`Creating user with UID: ${uid}, username: ${username}`);
     await this.usersService.createUser(uid, username);
   }
+  
   @Get('/me')
   @Auth()
   async getMe(@Req() request: RequestWithUser) {
