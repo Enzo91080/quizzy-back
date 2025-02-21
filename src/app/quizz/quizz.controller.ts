@@ -13,6 +13,7 @@ import { QuizzService } from './quizz.service';
 export class QuizzController {
   constructor(private readonly quizzService: QuizzService) { }
 
+  // Créer un quiz
   @Post()
   @Auth()
   async create(
@@ -40,6 +41,7 @@ export class QuizzController {
     }
   }
 
+  // Ajouter une question à un quiz
   @Post(':id/questions')
   @Auth()
   async createNewQuestion(
@@ -74,6 +76,7 @@ export class QuizzController {
     }
   }
 
+  // Récupérer tous les quiz de l'utilisateur
   @Get()
   @Auth()
   async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[]; _links: { create: string } }> {
@@ -87,11 +90,13 @@ export class QuizzController {
     };
   }
 
+  // Récupérer un quiz par son ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.quizzService.findOne(id);
   }
 
+  // Mettre à jour une question
   @Put(':id/questions/:questionId')
   @Auth()
   async updateQuestion(
@@ -116,6 +121,7 @@ export class QuizzController {
     }
   }
 
+  // Mettre à jour le titre d'un quiz
   @Patch(':id')
   @Auth()
   async updateTitle(
@@ -145,6 +151,7 @@ export class QuizzController {
     }
   }
 
+  // Supprimer un quiz
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.quizzService.remove(id);

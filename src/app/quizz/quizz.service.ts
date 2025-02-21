@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
 import { UpdateQuizzDto } from './dto/update-quizz.dto';
-import * as admin from 'firebase-admin';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { Question } from './entities/question.entity';
 
@@ -9,6 +8,7 @@ import { Question } from './entities/question.entity';
 export class QuizzService {
   constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) { }
 
+  // Créer un quiz
   async create(createQuizzDto: CreateQuizzDto, userId: string): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
 
@@ -25,23 +25,27 @@ export class QuizzService {
     return quizRef.id; // Retourne uniquement l'ID généré
   }
 
+  // Trouver tous les quiz d'un utilisateur
   async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
     return userQuizzes.docs.map((quiz) => quiz.data());
   }
 
+  // Trouver un quiz par ID
   async findOne(id: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quiz = await quizzesCollection.doc(id).get();
     return quiz.data();
   }
 
+  // Mettre à jour un quiz
   update(id: string, updateQuizzDto: UpdateQuizzDto) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     return quizzesCollection.doc(id).update({ ...updateQuizzDto });
   }
 
+  // Mettre à jour le titre d'un quiz
   async updateTitle(id: string, userId: string, title: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(id).get();
@@ -67,6 +71,7 @@ export class QuizzService {
     }
   }
 
+  // Ajouter une question à un quiz
   async addQuestionToQuiz(
     quizId: string,
     userId: string,
@@ -103,6 +108,7 @@ export class QuizzService {
     }
   }
 
+  // Mettre à jour une question
   async updateQuestion(quizId: string, userId: string, questionId: string, questionData: Question) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
@@ -136,6 +142,7 @@ export class QuizzService {
     }
   }
 
+  // Supprimer un quiz
   remove(id: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     return quizzesCollection

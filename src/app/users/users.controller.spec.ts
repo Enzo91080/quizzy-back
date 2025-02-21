@@ -18,7 +18,7 @@ class FakeUserRepository {
   }
 }
 
-describe('UsersController', () => {
+describe('UsersController (integration)', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
