@@ -86,7 +86,7 @@ export class QuizzController {
   @ApiOperation({ summary: 'Récupérer tous les quiz de l’utilisateur authentifié' })
   @ApiResponse({ status: 200, description: 'Liste des quiz récupérée avec succès' })
   async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[] }> {
-    const userId = request.user.uid;
+    const userId = request.user?.uid;
     const quizzes = await this.quizzService.findAll(userId);
     const baseUrl = `${request.protocol}://${request.get('host')}/api/quizz`;
 
