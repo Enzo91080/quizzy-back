@@ -18,7 +18,6 @@ import { UpdateTitleQuestionDto } from './dto/update-title-question.dto';
 export class QuizzController {
   constructor(private readonly quizzService: QuizzService) { }
 
-  // Créer un quiz
   @Post()
   @Auth()
   @ApiOperation({ summary: 'Créer un nouveau quiz' })
@@ -45,7 +44,6 @@ export class QuizzController {
     }
   }
 
-  // Ajouter une question à un quiz
   @Post(':id/questions')
   @Auth()
   @ApiOperation({ summary: 'Ajouter une question à un quiz' })
@@ -80,7 +78,46 @@ export class QuizzController {
     }
   }
 
-  // Récupérer tous les quiz de l'utilisateur
+  @Post(':id/start')
+  @Auth()
+  @ApiOperation({ summary: 'Démarrer une exécution de quiz' })
+  @ApiParam({ name: 'id', description: 'ID du quiz' })
+  @ApiResponse({ status: 201, description: 'Exécution démarrée' })
+  @ApiResponse({ status: 400, description: 'Quiz non prêt à être démarré' })
+  @ApiResponse({ status: 404, description: 'Quiz introuvable ou non accessible' })
+  async startQuizExecution(
+    @Param('id') quizId: string,
+    @Req() request: RequestWithUser,
+    @Res() res: Response
+  ) {
+    const userId = request.user?.uid;
+
+    if (!userId) {
+      throw new UnauthorizedException('Utilisateur non authentifié');
+    }
+
+    try {
+      const executionId = await this.quizzService.startExecution(quizId, userId);
+
+      const location = `${request.protocol}://${request.get('host')}/execution/${executionId}`;
+      res.setHeader('Location', location);
+
+      return res.status(201).end();
+    } catch (error) {
+      if (error.message === 'QUIZ_NOT_FOUND') {
+        return res.status(404).json({ message: 'Quiz introuvable ou non accessible' });
+      }
+
+      if (error.message === 'QUIZ_NOT_READY') {
+        return res.status(400).json({ message: 'Le quiz n’est pas prêt à être démarré' });
+      }
+
+      throw new InternalServerErrorException('Erreur lors du démarrage de l’exécution');
+    }
+  }
+
+
+
   @Get()
   @Auth()
   @ApiOperation({ summary: 'Récupérer tous les quiz de l’utilisateur authentifié' })
@@ -104,7 +141,6 @@ export class QuizzController {
     };
   }
 
-  // Récupérer un quiz par son ID
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un quiz spécifique' })
   @ApiParam({ name: 'id', description: 'ID du quiz' })
@@ -114,32 +150,6 @@ export class QuizzController {
     return this.quizzService.findOne(id);
   }
 
-  // Mettre à jour une question
-  @Put(':id/questions/:questionId')
-  @Auth()
-  async updateQuestion(
-    @Param('id') id: string,
-    @Param('questionId') questionId: string,
-    @Body() questionData: Question,
-    @Req() request: RequestWithUser,
-    @Res() res: Response
-  ) {
-    try {
-      const userId = request.user.uid;
-      const updated = await this.quizzService.updateQuestion(id, userId, questionId, questionData);
-
-      if (!updated) {
-        return res.status(404).json({ message: 'Question not found or does not belong to user' });
-      }
-
-      return res.status(204).end();
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Error updating question' });
-    }
-  }
-
-  // Mettre à jour le titre d'un quiz
   @Patch(':id')
   @Auth()
   @ApiOperation({ summary: 'Mettre à jour le titre d’un quiz' })
@@ -176,7 +186,38 @@ export class QuizzController {
     }
   }
 
-  // Supprimer un quiz
+  @Put(':id/questions/:questionId')
+  @Auth()
+  @ApiOperation({ summary: 'Mettre à jour une question dans un quiz' })
+  @ApiParam({ name: 'id', description: 'ID du quiz' })
+  @ApiParam({ name: 'questionId', description: 'ID de la question' })
+  @ApiResponse({ status: 204, description: 'Question mise à jour avec succès' })
+  @ApiResponse({ status: 404, description: 'Question non trouvée' })
+  @ApiResponse({ status: 500, description: 'Erreur lors de la mise à jour' })
+  async updateQuestion(
+    @Param('id') id: string,
+    @Param('questionId') questionId: string,
+    @Body() questionData: UpdateQuestionDto,
+    @Req() request: RequestWithUser,
+    @Res() res: Response
+  ) {
+    try {
+      const userId = request.user.uid;
+      const updated = await this.quizzService.updateQuestion(id, userId, questionId, questionData);
+
+      if (!updated) {
+        return res.status(404).json({ message: 'Question not found or does not belong to user' });
+      }
+
+      return res.status(204).end();
+    } catch (error) {
+      return res.status(500).json({ message: 'Error updating question' });
+    }
+  }
+
+
+
+
   @Delete(':id')
   @ApiOperation({ summary: 'Supprimer un quiz' })
   @ApiParam({ name: 'id', description: 'ID du quiz' })

@@ -6,6 +6,10 @@ import { Question } from './entities/question.entity';
 import { FindQuizzDto } from './dto/find-quizz';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
+import { StartableQuizDto } from './dto/startable-quizz.dto';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class QuizzService {
@@ -160,32 +164,51 @@ export class QuizzService {
       });
   }
 
-  canStartQuiz(quiz: FindQuizzDto): boolean {
-    if (!quiz.title || quiz.title.trim() === '') {
-      return false; // Le titre est vide
-    }
-
-    if (!quiz.questions || quiz.questions.length === 0) {
-      return false; // Pas de questions
-    }
-
-    for (const question of quiz.questions) {
-      if (!question.title || question.title.trim() === '') {
-        return false; // Question sans titre
-      }
-
-      if (!question.answers || question.answers.length < 2) {
-        return false; // Moins de deux réponses
-      }
-
-      const correctAnswers = question.answers.filter(answer => answer.isCorrect);
-      if (correctAnswers.length !== 1) {
-        return false; // Pas exactement une réponse correcte
-      }
-    }
-
-    return true;
+  async canStartQuiz(quiz: FindQuizzDto): Promise<boolean> {
+    const dto = plainToInstance(StartableQuizDto, quiz);
+    const errors = await validate(dto, { whitelist: true });
+    return errors.length === 0;
   }
 
+  async startExecution(quizId: string, userId: string): Promise<string> {
+    const quizzesCollection = this.fa.firestore.collection('quizzes');
+    const executionsCollection = this.fa.firestore.collection('executions');
+
+    // 1. Récupérer le quiz
+    const quizDoc = await quizzesCollection.doc(quizId).get();
+
+    if (!quizDoc.exists) {
+      throw new Error('QUIZ_NOT_FOUND');
+    }
+
+    const quizData = quizDoc.data();
+
+    // 2. Vérifier le propriétaire
+    if (quizData.userId !== userId) {
+      throw new Error('QUIZ_NOT_FOUND'); // volontaire pour éviter de leak les IDs
+    }
+
+    // 3. Vérifier que le quiz est prêt
+    if (!this.canStartQuiz({
+      ...quizData, id: quizId,
+      title: quizData.title,
+    })) {
+      throw new Error('QUIZ_NOT_READY');
+    }
+
+    // 4. Générer un ID court (6 caractères hex)
+    const executionId = randomBytes(3).toString('hex');
+
+    // 5. Enregistrer l'exécution
+    await executionsCollection.doc(executionId).set({
+      id: executionId,
+      quizId,
+      userId,
+      startedAt: new Date().toISOString(),
+      status: 'active', // ou "in_progress" selon tes préférences
+    });
+
+    return executionId;
+  }
 
 }

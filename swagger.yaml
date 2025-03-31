@@ -1,0 +1,431 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api": {
+      "get": {
+        "operationId": "AppController_getData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/message": {
+      "post": {
+        "operationId": "AppController_postData",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/api/quizz": {
+      "post": {
+        "operationId": "QuizzController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuizzDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Quiz créé avec succès"
+          },
+          "500": {
+            "description": "Erreur lors de la création du quiz"
+          }
+        },
+        "summary": "Créer un nouveau quiz",
+        "tags": [
+          "Quizz"
+        ]
+      },
+      "get": {
+        "operationId": "QuizzController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des quiz récupérée avec succès"
+          }
+        },
+        "summary": "Récupérer tous les quiz de l’utilisateur authentifié",
+        "tags": [
+          "Quizz"
+        ]
+      }
+    },
+    "/api/quizz/{id}/questions": {
+      "post": {
+        "operationId": "QuizzController_createNewQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Question ajoutée avec succès"
+          },
+          "500": {
+            "description": "Erreur lors de l’ajout de la question"
+          }
+        },
+        "summary": "Ajouter une question à un quiz",
+        "tags": [
+          "Quizz"
+        ]
+      }
+    },
+    "/api/quizz/{id}": {
+      "get": {
+        "operationId": "QuizzController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quiz trouvé"
+          },
+          "404": {
+            "description": "Quiz non trouvé"
+          }
+        },
+        "summary": "Récupérer un quiz spécifique",
+        "tags": [
+          "Quizz"
+        ]
+      },
+      "patch": {
+        "operationId": "QuizzController_updateTitle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Liste des opérations JSON Patch pour modifier le titre",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UpdateTitleQuestionDto"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Titre mis à jour"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "404": {
+            "description": "Quiz non trouvé"
+          }
+        },
+        "summary": "Mettre à jour le titre d’un quiz",
+        "tags": [
+          "Quizz"
+        ]
+      },
+      "delete": {
+        "operationId": "QuizzController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quiz supprimé"
+          },
+          "404": {
+            "description": "Quiz non trouvé"
+          }
+        },
+        "summary": "Supprimer un quiz",
+        "tags": [
+          "Quizz"
+        ]
+      }
+    },
+    "/api/quizz/{id}/questions/{questionId}": {
+      "put": {
+        "operationId": "QuizzController_updateQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID du quiz",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "required": true,
+            "in": "path",
+            "description": "ID de la question",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuestionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Question mise à jour avec succès"
+          },
+          "404": {
+            "description": "Question non trouvée"
+          },
+          "500": {
+            "description": "Erreur lors de la mise à jour"
+          }
+        },
+        "summary": "Mettre à jour une question dans un quiz",
+        "tags": [
+          "Quizz"
+        ]
+      }
+    },
+    "/api/ping": {
+      "get": {
+        "operationId": "PingController_ping",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Ping"
+        ]
+      }
+    },
+    "/api/users": {
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "API Quizzy",
+    "description": "The Quizzy API description",
+    "version": "1.0",
+    "contact": {
+
+    }
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "AnswerDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "isCorrect": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "isCorrect"
+        ]
+      },
+      "CreateQuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnswerDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "answers"
+        ]
+      },
+      "CreateQuizzDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateQuestionDto"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "questions"
+        ]
+      },
+      "UpdateTitleQuestionDto": {
+        "type": "object",
+        "properties": {
+          "op": {
+            "type": "string",
+            "example": "replace",
+            "description": "Opération JSON Patch ('replace' attendu)"
+          },
+          "path": {
+            "type": "string",
+            "example": "/title",
+            "description": "Chemin de la propriété à modifier"
+          },
+          "value": {
+            "type": "string",
+            "example": "Nouveau titre",
+            "description": "Nouvelle valeur du titre"
+          }
+        },
+        "required": [
+          "op",
+          "path",
+          "value"
+        ]
+      },
+      "UpdateQuestionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnswerDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "answers"
+        ]
+      }
+    }
+  }
+}
