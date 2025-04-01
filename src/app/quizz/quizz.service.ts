@@ -18,18 +18,17 @@ export class QuizzService {
   // Créer un quiz
   async create(createQuizzDto: CreateQuizzDto, userId: string): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
+    const quizId = quizzesCollection.doc().id; // Générer un ID unique pour le quiz
 
-    // Ajouter un quiz en Firestore
-    const quizRef = await quizzesCollection.add({
+    // Créer le quiz avec l'ID généré et l'ID de l'utilisateur
+    await quizzesCollection.doc(quizId).set({
       ...createQuizzDto,
+      id: quizId,
       userId,
-      questions: createQuizzDto.questions.map((question) => ({
-        id: this.fa.firestore.collection('quizzes').doc().id, // Générer un ID unique pour chaque question
-        ...question,
-      })),
+      questions: [], // Initialiser avec un tableau vide de questions
     });
 
-    return quizRef.id; // Retourne uniquement l'ID généré
+    return quizId; // Retourner l'ID du quiz créé
   }
 
   // Trouver tous les quiz d'un utilisateur

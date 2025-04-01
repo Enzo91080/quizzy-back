@@ -14,7 +14,7 @@ import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdateTitleQuestionDto } from './dto/update-title-question.dto';
 
 @ApiTags('Quizz') // 📌 Ajout d'une catégorie dans Swagger
-@Controller('quizz')
+@Controller('quiz')
 export class QuizzController {
   constructor(private readonly quizzService: QuizzService) { }
 
@@ -35,7 +35,7 @@ export class QuizzController {
       }
 
       const quizId = await this.quizzService.create(createQuizzDto, uid);
-      const quizUrl = `${request.protocol}://${request.get('host')}/quizz/${quizId}`;
+      const quizUrl = `${request.protocol}://${request.get('host')}/quiz/${quizId}`;
 
       res.setHeader('Location', quizUrl);
       return res.status(201).end();
@@ -67,7 +67,7 @@ export class QuizzController {
         throw new InternalServerErrorException('Impossible d’ajouter la question');
       }
 
-      const questionUrl = `${request.protocol}://${request.get('host')}/quizz/${id}/questions/${questionId}`;
+      const questionUrl = `${request.protocol}://${request.get('host')}/quiz/${id}/questions/${questionId}`;
       res.setHeader('Location', questionUrl);
       return res.status(201).json({ id: questionId, message: 'Question ajoutée avec succès' });
     } catch (error) {
@@ -125,7 +125,7 @@ export class QuizzController {
   async findAll(@Req() request: RequestWithUser): Promise<{ data: FindQuizzDto[] }> {
     const userId = request.user.uid;
     const quizzes = await this.quizzService.findAll(userId);
-    const baseUrl = `${request.protocol}://${request.get('host')}/api/quizz`;
+    const baseUrl = `${request.protocol}://${request.get('host')}/api/quiz`;
 
     return {
       data: quizzes.map(quiz => {

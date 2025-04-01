@@ -26,6 +26,12 @@ async function bootstrap() {
     jsonDocumentUrl: 'swagger/yaml',
   });
 
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+  });
+
   // 🔒 Ajoute la validation globale
   app.useGlobalPipes(
     new ValidationPipe({

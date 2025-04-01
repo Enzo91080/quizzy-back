@@ -7,8 +7,10 @@ export class CreateQuizzDto {
 
     @ApiProperty()
     description: string;
+}
 
-    @ApiProperty({ type: () => [CreateQuestionDto] })
+export class CreateQuizzWithQuestionsDto extends CreateQuizzDto {
+    @ApiProperty({ type: [CreateQuestionDto] })
     questions: CreateQuestionDto[];
 }
 
