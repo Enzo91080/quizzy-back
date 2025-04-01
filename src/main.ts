@@ -30,7 +30,9 @@ async function bootstrap() {
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
+    exposedHeaders: ['Location'],
   });
+
 
   // 🔒 Ajoute la validation globale
   app.useGlobalPipes(

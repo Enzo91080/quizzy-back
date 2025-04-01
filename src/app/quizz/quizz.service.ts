@@ -22,9 +22,10 @@ export class QuizzService {
 
     // Créer le quiz avec l'ID généré et l'ID de l'utilisateur
     await quizzesCollection.doc(quizId).set({
-      ...createQuizzDto,
       id: quizId,
       userId,
+      title: createQuizzDto.title,
+      description: createQuizzDto.description,
       questions: [], // Initialiser avec un tableau vide de questions
     });
 

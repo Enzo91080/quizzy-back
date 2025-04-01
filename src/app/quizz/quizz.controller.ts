@@ -34,12 +34,14 @@ export class QuizzController {
         throw new UnauthorizedException('Utilisateur non authentifié');
       }
 
+      console.log(createQuizzDto);
       const quizId = await this.quizzService.create(createQuizzDto, uid);
       const quizUrl = `${request.protocol}://${request.get('host')}/quiz/${quizId}`;
 
       res.setHeader('Location', quizUrl);
       return res.status(201).end();
     } catch (error) {
+      console.error('Erreur lors de la création du quiz:', error);
       throw new InternalServerErrorException('Erreur lors de la création du quiz');
     }
   }
