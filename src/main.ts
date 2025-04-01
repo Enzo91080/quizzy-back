@@ -35,13 +35,11 @@ async function bootstrap() {
 
 
   // 🔒 Ajoute la validation globale
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,        // Retire les propriétés non définies dans le DTO
-      // forbidNonWhitelisted: true, // Lève une erreur si des props inconnues sont envoyées
-      transform: true,        // Transforme les payloads en instances de classes
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
 
   await app.listen(port);
   Logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);

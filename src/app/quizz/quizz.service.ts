@@ -7,7 +7,7 @@ import { FindQuizzDto } from './dto/find-quizz';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { StartableQuizDto } from './dto/startable-quizz.dto';
-import { plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { randomBytes } from 'crypto';
 
@@ -84,6 +84,7 @@ export class QuizzService {
     userId: string,
     questionData: CreateQuestionDto, // Exclure l'ID car il sera généré
   ) {
+
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
 
@@ -115,38 +116,36 @@ export class QuizzService {
     }
   }
 
-  async updateQuestion(quizId: string, userId: string, questionId: string, questionData: UpdateQuestionDto) {
-    const quizzesCollection = this.fa.firestore.collection('quizzes');
-    const quizDoc = await quizzesCollection.doc(quizId).get();
+  async updateQuestion(
+    quizId: string,
+    userId: string,
+    questionId: string,
+    questionData: UpdateQuestionDto,
+  ): Promise<boolean> {
+    const quizRef = this.fa.firestore.collection('quizzes').doc(quizId);
+    const quizSnap = await quizRef.get();
 
-    // Vérifier si le quiz existe
-    if (!quizDoc.exists) {
-      return false; // Permet au contrôleur de renvoyer un 404
-    }
+    if (!quizSnap.exists) return false;
 
-    const quizData = quizDoc.data();
+    const quiz = quizSnap.data();
+    if (quiz.userId !== userId) return false;
 
-    // Vérifier si l'utilisateur est bien le propriétaire du quiz
-    if (quizData.userId !== userId) {
-      return false; // Permet au contrôleur de renvoyer un 404
-    }
+    const updatedQuestions = (quiz.questions || []).map((q: any) =>
+      q.id === questionId ? { ...q, ...questionData } : q
+    );
 
-    // Mettre à jour la question dans la liste des questions
-    const updatedQuestions = quizData.questions.map((question: UpdateQuestionDto) => {
-      if (question.id === questionId) {
-        return { ...question, ...questionData };
-      }
-      return question;
-    });
+    const plainQuestions = updatedQuestions.map(q => instanceToPlain(q));
 
     try {
-      await quizzesCollection.doc(quizId).update({ questions: updatedQuestions });
-      return true; // Indique que la mise à jour a été effectuée
+      await quizRef.update({ questions: plainQuestions });
+      return true;
     } catch (error) {
-      console.error(`Erreur lors de la mise à jour de la question ${questionId} du quiz ${quizId}:`, error);
+      console.error(`Erreur MAJ question ${questionId} dans quiz ${quizId}:`, error);
       throw new Error('Erreur lors de la mise à jour de la question');
     }
   }
+
+
 
   // Supprimer un quiz
   remove(id: string) {

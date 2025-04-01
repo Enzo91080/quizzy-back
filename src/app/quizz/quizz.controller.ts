@@ -33,8 +33,6 @@ export class QuizzController {
       if (!uid) {
         throw new UnauthorizedException('Utilisateur non authentifié');
       }
-
-      console.log(createQuizzDto);
       const quizId = await this.quizzService.create(createQuizzDto, uid);
       const quizUrl = `${request.protocol}://${request.get('host')}/quiz/${quizId}`;
 
@@ -59,6 +57,7 @@ export class QuizzController {
     @Res() res: Response
   ) {
     try {
+
       const userId = request.user?.uid;
       if (!userId) {
         throw new UnauthorizedException('Utilisateur non authentifié');
@@ -68,6 +67,7 @@ export class QuizzController {
       if (!questionId) {
         throw new InternalServerErrorException('Impossible d’ajouter la question');
       }
+
 
       const questionUrl = `${request.protocol}://${request.get('host')}/quiz/${id}/questions/${questionId}`;
       res.setHeader('Location', questionUrl);
