@@ -84,37 +84,34 @@ export class QuizzService {
     userId: string,
     questionData: CreateQuestionDto, // Exclure l'ID car il sera généré
   ) {
-
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
 
-    // Vérifier si le quiz existe
     if (!quizDoc.exists) {
       throw new Error('Quiz not found or unauthorized');
     }
 
     const quizData = quizDoc.data();
 
-    // Vérifier si l'utilisateur est bien le propriétaire du quiz
     if (quizData.userId !== userId) {
       throw new Error('Quiz not found or unauthorized');
     }
 
-    // Générer un ID unique pour la nouvelle question
     const questionId = this.fa.firestore.collection('quizzes').doc().id;
 
-    // Ajouter la nouvelle question avec l'ID généré
-    const newQuestion: CreateQuestionDto = { id: questionId, ...questionData };
-    const updatedQuestions = quizData.questions ? [...quizData.questions, newQuestion] : [newQuestion];
+    // 🔥 Nettoyage des objets DTO avec prototype
+    const plainQuestion = instanceToPlain({ id: questionId, ...questionData });
+    const updatedQuestions = quizData.questions ? [...quizData.questions, plainQuestion] : [plainQuestion];
 
     try {
       await quizzesCollection.doc(quizId).update({ questions: updatedQuestions });
-      return questionId; // Retourner l'ID de la question ajoutée
+      return questionId;
     } catch (error) {
       console.error('Erreur lors de l’ajout de la question :', error);
       throw new Error('Erreur lors de l’ajout de la question');
     }
   }
+
 
   async updateQuestion(
     quizId: string,
