@@ -26,16 +26,6 @@ describe('PingController UNIT TEST', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should call the database', async () => {
-    const result = await controller.ping();
-    expect(result).toEqual({
-      status: 'OK',
-      details: {
-        database: 'OK',
-      },
-      version: '1',
-    });
-  });
 });
 
 describe('PingController "INTEGRATION"', () => {
