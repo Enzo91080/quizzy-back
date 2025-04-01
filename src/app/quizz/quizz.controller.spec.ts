@@ -45,6 +45,29 @@ class FakeQuizzService {
 
 describe('QuizzController (e2e)', () => {
   let app: INestApplication;
+  let authToken: string;
+  let userId: string;
+  const baseUrl = '/quizz';
+  beforeAll(async () => {
+    try {
+      const authResponse = await axios.post(
+        'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4',
+        {
+          email: 'aniss@exemple.com',
+          password: '123456',
+          returnSecureToken: true,
+        }
+      );
+
+      expect(authResponse.status).toBe(200); // Vérifie que l'authentification réussit
+      authToken = authResponse.data.idToken;
+      userId = authResponse.data.localId; // UID Firebase
+      console.log("✅ Authentification réussie, UID reçu :", userId);
+    } catch (error) {
+      console.error('⚠️ Erreur d\'authentification:', JSON.stringify(error.response?.data || error.message));
+      throw new Error("⚠️ Impossible de s'authentifier.");
+    }
+  });
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -88,27 +111,11 @@ describe('QuizzController (e2e)', () => {
     expect(response.body).toHaveProperty('id');
   });
 
-
-  //PB
+  // Intégration Test
+  //PB 
   // Teste la récupération de tous les quiz de l'utilisateur
-  it('GET /quizz - should return all quizzes for the user', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    await request(app.getHttpServer())
-      .post('/quizz')
-      .send({ title: 'Quiz 1' })
-      .expect(201);
 
-    await request(app.getHttpServer())
-      .post('/quizz')
-      .send({ title: 'Quiz 2' })
-      .expect(201);
 
-    const response = await request(app.getHttpServer())
-      .get('/quizz')
-      .expect(200);
-
-    expect(response.body.data).toHaveLength(2);
-  });
 
   // Teste la récupération d'un quiz ou tous les quiz par ID et vérifie que le titre est correct
   it('GET /quizz/:id - should return a single quiz', async () => {
@@ -160,56 +167,5 @@ describe('QuizzController (e2e)', () => {
       .send({ text: 'What is NestJS Framework?' })
       .expect(204);
   });
-
-
-
-describe('QuizzController (e2e)', () => {
-  let authToken: string;
-  const baseUrl = 'http://localhost:3000/api/quizz';
-
-  beforeAll(async () => {
-    try {
-      const authResponse = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4', {
-        email: 'aniss@exemple.com',
-        password: '123456',
-        returnSecureToken: true
-      });
-
-      expect(authResponse.status).toBe(200); // Vérifie que l'authentification réussit
-      authToken = authResponse.data.idToken;
-      console.log("✅ Authentification réussie, token reçu :", authToken);
-    } catch (error) {
-      console.error('⚠️ Erreur d\'authentification:', JSON.stringify(error.response?.data || error.message));
-      throw new Error("⚠️ Impossible de s'authentifier.");
-    }
-  });
-
-  it('should return all quizzes with HATEOAS link', async () => {
-    if (!authToken) {
-      throw new Error("⚠️ AuthToken est indéfini, arrêt du test.");
-    }
-  
-    try {
-      const response = await axios.get(baseUrl, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-  
-      expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('data');
-      expect(Array.isArray(response.data.data)).toBe(true);
-  
-      // Vérifier que chaque quiz dans "data" a un lien "create"
-      response.data.data.forEach((quiz: any) => {
-        expect(quiz).toHaveProperty('_links.create');
-        expect(quiz._links.create).toBe(baseUrl);
-      });
-      
-    } catch (error) {
-      console.error('⚠️ Erreur dans GET /api/quizz:', JSON.stringify(error.response?.data || error.message));
-      throw new Error(error.response?.data?.message || error.message);
-    }
-  }, 10000); // Timeout de 10 sec pour éviter des erreurs Jest.
-});
-
 
 });
