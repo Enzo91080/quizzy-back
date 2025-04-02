@@ -53,10 +53,9 @@ it('should return all quizzes with HATEOAS link', async () => {
       console.error('⚠️ Erreur dans GET /api/quizz:', JSON.stringify(error.response?.data || error.message));
       throw new Error(error.response?.data?.message || error.message);
     }
-  }, 500); // Timeout de 10 sec pour éviter des erreurs Jest.
+  }); // Timeout de 10 sec pour éviter des erreurs Jest.
 
    // Test de récupération des quizzes (GET /quizz)
-
 
    it('GET /quizz - should return all quizzes for the user', async () => {
     if (!authToken) {
