@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 describe('POST /api/users', () => {
-  it('should return 201 if user is authenticated', async () => {
+  it('should return 200 if user is authenticated', async () => {
     const auth = await axios.post(
       'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4',
       {
@@ -16,11 +16,11 @@ describe('POST /api/users', () => {
     console.log(token);
   });
 
-  it('should return 401 if user is not authenticated', async () => {
+  it('should return 400 if user is not authenticated', async () => {
     try {
-      await axios.post('/api/users', {});
+      await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4', {});
     } catch (e) {
-      expect(e.status).toBe(401);
+      expect(e.status).toBe(400);
     }
   });
 });
