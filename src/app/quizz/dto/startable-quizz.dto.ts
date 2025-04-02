@@ -10,6 +10,7 @@ import {
     ValidationArguments,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 @ValidatorConstraint({ name: 'IsValidAnswers', async: false })
 class IsValidAnswersConstraint implements ValidatorConstraintInterface {
@@ -26,10 +27,12 @@ class IsValidAnswersConstraint implements ValidatorConstraintInterface {
 }
 
 class QuestionDto {
+    @ApiProperty()
     @IsString()
     @IsNotEmpty({ message: 'Le titre de la question ne doit pas être vide' })
     title: string;
 
+    @ApiProperty()
     @IsArray()
     @ArrayMinSize(2, {
         message: 'Chaque question doit avoir au moins deux réponses',
@@ -39,10 +42,12 @@ class QuestionDto {
 }
 
 export class StartableQuizDto {
+    @ApiProperty()
     @IsString()
     @IsNotEmpty({ message: 'Le titre du quiz ne doit pas être vide' })
     title: string;
 
+    @ApiProperty()
     @IsArray({ message: 'Le quiz doit contenir au moins une question' })
     @ArrayMinSize(1, { message: 'Le quiz doit contenir au moins une question' })
     @ValidateNested({ each: true })

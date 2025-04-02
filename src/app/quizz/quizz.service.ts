@@ -15,91 +15,78 @@ import { randomBytes } from 'crypto';
 export class QuizzService {
   constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) { }
 
-  // Créer un quiz
+  /**
+   * Créer un quiz
+   */
   async create(createQuizzDto: CreateQuizzDto, userId: string): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
-    const quizId = quizzesCollection.doc().id; // Générer un ID unique pour le quiz
-
-    // Créer le quiz avec l'ID généré et l'ID de l'utilisateur
+    const quizId = quizzesCollection.doc().id;
     await quizzesCollection.doc(quizId).set({
       id: quizId,
       userId,
       title: createQuizzDto.title,
       description: createQuizzDto.description,
-      questions: [], // Initialiser avec un tableau vide de questions
+      questions: [],
     });
-
-    return quizId; // Retourner l'ID du quiz créé
+    return quizId;
   }
 
-  // Trouver tous les quiz d'un utilisateur
+  /**
+   * Récupérer tous les quiz d'un utilisateur
+   */
   async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
     return userQuizzes.docs.map((quiz) => ({ ...quiz.data(), id: quiz.id }));
   }
 
-  // Trouver un quiz par ID
+  /**
+   * Récupérer un quiz spécifique par ID
+   */
   async findOne(id: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quiz = await quizzesCollection.doc(id).get();
     return quiz.data();
   }
 
-  // Mettre à jour un quiz
+  /**
+   * Mettre à jour un quiz
+   */
   update(id: string, updateQuizzDto: UpdateQuizzDto) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     return quizzesCollection.doc(id).update({ ...updateQuizzDto });
   }
 
-  // Mettre à jour le titre d'un quiz
+  /**
+   * Mettre à jour le titre d'un quiz (avec vérification de propriété)
+   */
   async updateTitle(id: string, userId: string, title: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(id).get();
-
-    // Vérifier si le quiz existe
-    if (!quizDoc.exists) {
-      return null; // Permet au contrôleur de renvoyer un 404
-    }
-
+    if (!quizDoc.exists) return null;
     const quizData = quizDoc.data();
-
-    // Vérifier si l'utilisateur est bien le propriétaire du quiz
-    if (quizData.userId !== userId) {
-      return null; // Permet au contrôleur de renvoyer un 404
-    }
+    if (quizData.userId !== userId) return null;
 
     try {
       await quizzesCollection.doc(id).update({ title });
-      return true; // Indique que la mise à jour a été effectuée
+      return true;
     } catch (error) {
       console.error(`Erreur lors de la mise à jour du titre du quiz ${id}:`, error);
       throw new Error('Erreur lors de la mise à jour du titre du quiz.');
     }
   }
 
-  // Ajouter une question à un quiz
-  async addQuestionToQuiz(
-    quizId: string,
-    userId: string,
-    questionData: CreateQuestionDto, // Exclure l'ID car il sera généré
-  ) {
+  /**
+   * Ajouter une question à un quiz (et sérialiser les objets)
+   */
+  async addQuestionToQuiz(quizId: string, userId: string, questionData: CreateQuestionDto) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
-
-    if (!quizDoc.exists) {
-      throw new Error('Quiz not found or unauthorized');
-    }
-
+    if (!quizDoc.exists) throw new Error('Quiz not found or unauthorized');
     const quizData = quizDoc.data();
-
-    if (quizData.userId !== userId) {
-      throw new Error('Quiz not found or unauthorized');
-    }
+    if (quizData.userId !== userId) throw new Error('Quiz not found or unauthorized');
 
     const questionId = this.fa.firestore.collection('quizzes').doc().id;
-
-    // 🔥 Nettoyage des objets DTO avec prototype
     const plainQuestion = instanceToPlain({ id: questionId, ...questionData });
     const updatedQuestions = quizData.questions ? [...quizData.questions, plainQuestion] : [plainQuestion];
 
@@ -112,7 +99,9 @@ export class QuizzService {
     }
   }
 
-
+  /**
+   * Mettre à jour une question existante dans un quiz
+   */
   async updateQuestion(
     quizId: string,
     userId: string,
@@ -121,16 +110,13 @@ export class QuizzService {
   ): Promise<boolean> {
     const quizRef = this.fa.firestore.collection('quizzes').doc(quizId);
     const quizSnap = await quizRef.get();
-
     if (!quizSnap.exists) return false;
-
     const quiz = quizSnap.data();
     if (quiz.userId !== userId) return false;
 
     const updatedQuestions = (quiz.questions || []).map((q: any) =>
       q.id === questionId ? { ...q, ...questionData } : q
     );
-
     const plainQuestions = updatedQuestions.map(q => instanceToPlain(q));
 
     try {
@@ -142,9 +128,9 @@ export class QuizzService {
     }
   }
 
-
-
-  // Supprimer un quiz
+  /**
+   * Supprimer un quiz par son ID
+   */
   remove(id: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     return quizzesCollection
@@ -160,60 +146,54 @@ export class QuizzService {
       });
   }
 
+  /**
+   * Vérifie si un quiz est prêt à être démarré
+   */
   async canStartQuiz(quiz: FindQuizzDto): Promise<boolean> {
     const dto = plainToInstance(StartableQuizDto, quiz);
     const errors = await validate(dto, { whitelist: true });
     return errors.length === 0;
   }
 
+  /**
+   * Démarre une exécution de quiz
+   */
   async startExecution(quizId: string, userId: string): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const executionsCollection = this.fa.firestore.collection('executions');
 
-    // 1. Récupérer le quiz
     const quizDoc = await quizzesCollection.doc(quizId).get();
-
-    if (!quizDoc.exists) {
-      throw new Error('QUIZ_NOT_FOUND');
-    }
-
+    if (!quizDoc.exists) throw new Error('QUIZ_NOT_FOUND');
     const quizData = quizDoc.data();
+    if (quizData.userId !== userId) throw new Error('QUIZ_NOT_FOUND');
 
-    // 2. Vérifier le propriétaire
-    if (quizData.userId !== userId) {
-      throw new Error('QUIZ_NOT_FOUND'); // volontaire pour éviter de leak les IDs
-    }
-
-    // 3. Vérifier que le quiz est prêt
-    if (!this.canStartQuiz({
-      ...quizData, id: quizId,
-      title: quizData.title,
-    })) {
+    if (!this.canStartQuiz({ ...quizData, id: quizId, title: quizData.title })) {
       throw new Error('QUIZ_NOT_READY');
     }
 
-    // 4. Générer un ID court (6 caractères hex)
     const executionId = randomBytes(3).toString('hex');
-
-    // 5. Enregistrer l'exécution
     await executionsCollection.doc(executionId).set({
       id: executionId,
       quizId,
       userId,
       startedAt: new Date().toISOString(),
-      status: 'active', // ou "in_progress" selon tes préférences
+      status: 'active',
     });
 
     return executionId;
   }
 
+  /**
+   * Récupère une exécution par son ID
+   */
   async getExecutionById(executionId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
     return this.fa.firestore.collection('executions').doc(executionId).get();
   }
 
+  /**
+   * Récupère un quiz par son ID
+   */
   async getQuizById(quizId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
     return this.fa.firestore.collection('quizzes').doc(quizId).get();
   }
-
-
 }
