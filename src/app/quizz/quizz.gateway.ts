@@ -16,6 +16,7 @@ export class QuizGateway implements OnGatewayConnection {
 
     private hostSockets = new Map<string, Socket>(); // executionId -> host socket
     private currentQuestionIndex = new Map<string, number>(); // executionId -> index
+    private quizStatus = new Map<string, 'waiting' | 'started'>(); // executionId -> current status
 
     constructor(private readonly quizzService: QuizzService) { }
 
@@ -48,6 +49,7 @@ export class QuizGateway implements OnGatewayConnection {
             const room = `execution_${executionId}`;
 
             this.hostSockets.set(executionId, client);
+            this.quizStatus.set(executionId, 'waiting');
             client.join(room);
 
             client.emit('hostDetails', {
@@ -99,9 +101,10 @@ export class QuizGateway implements OnGatewayConnection {
             });
 
             const participantCount = this.server.sockets.adapter.rooms.get(room)?.size || 1;
+            const status = this.quizStatus.get(executionId) ?? 'waiting';
 
             this.server.to(room).emit('status', {
-                status: 'waiting',
+                status,
                 participants: participantCount,
             });
         } catch (error) {
@@ -143,6 +146,7 @@ export class QuizGateway implements OnGatewayConnection {
             }
 
             this.currentQuestionIndex.set(executionId, currentIndex + 1);
+            this.quizStatus.set(executionId, 'started');
 
             const participantCount = this.server.sockets.adapter.rooms.get(room)?.size || 1;
 

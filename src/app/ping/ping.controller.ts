@@ -3,11 +3,10 @@ import { VersionRepositoryService } from './version-repository.service';
 
 @Controller('ping')
 export class PingController {
-  constructor(private readonly versionRepository: VersionRepositoryService) {}
+  constructor(private readonly versionRepository: VersionRepositoryService) { }
 
   @Get()
   async ping() {
-    console.log('📡 Requête ping reçue');
     let databaseStatus = 'KO';
 
     try {
