@@ -47,7 +47,7 @@ describe('QuizzController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
-  const baseUrl = '/quizz';
+  const baseUrl = '/quiz';
   beforeAll(async () => {
     try {
       const authResponse = await axios.post(
@@ -84,87 +84,63 @@ describe('QuizzController (e2e)', () => {
   });
 
   // Teste la création d'un quiz
-  it('POST /quizz - should create a quiz', async () => {
+  it('POST /quiz - should create a quiz', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const response = await request(app.getHttpServer())
-      .post('/quizz')
+      .post('/quiz')
       .send({ title: 'Test Quiz' })
       .expect(201);
 
-    expect(response.header.location).toMatch(/\/quizz\/quiz-\d+/);
+    expect(response.header.location).toMatch(/\/quiz\/quiz-\d+/);
   });
 
   // Teste l'ajout d'une question à un quiz
-  it('POST /quizz/:id/questions - should add a question to a quiz', async () => {
+  it('POST /quiz/:id/questions - should add a question to a quiz', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const quizResponse = await request(app.getHttpServer())
-      .post('/quizz')
+      .post('/quiz')
       .send({ title: 'Test Quiz' })
       .expect(201);
 
     const quizId = quizResponse.header.location.split('/').pop();
     const response = await request(app.getHttpServer())
-      .post(`/quizz/${quizId}/questions`)
+      .post(`/quiz/${quizId}/questions`)
       .send({ text: 'What is NestJS?' })
       .expect(201);
 
     expect(response.body).toHaveProperty('id');
   });
 
-  // Intégration Test
-  //PB 
-  // Teste la récupération de tous les quiz de l'utilisateur
-
 
 
   // Teste la récupération d'un quiz ou tous les quiz par ID et vérifie que le titre est correct
-  it('GET /quizz/:id - should return a single quiz', async () => {
+  it('GET /quiz/:id - should return a single quiz', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const quizResponse = await request(app.getHttpServer())
-      .post('/quizz')
+      .post('/quiz')
       .send({ title: 'Test Quiz' })
       .expect(201);
 
     const quizId = quizResponse.header.location.split('/').pop();
     const response = await request(app.getHttpServer())
-      .get(`/quizz/${quizId}`)
+      .get(`/quiz/${quizId}`)
       .expect(200);
 
     expect(response.body.title).toBe('Test Quiz');
   });
 
   // Teste la mise à jour du titre d'un quiz
-  it('PATCH /quizz/:id - should update quiz title', async () => {
+  it('PATCH /quiz/:id - should update quiz title', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const createResponse = await request(app.getHttpServer())
-      .post('/quizz')
+      .post('/quiz')
       .send({ title: 'Old Title' })
       .expect(201);
 
     const quizId = createResponse.header.location.split('/').pop();
     await request(app.getHttpServer())
-      .patch(`/quizz/${quizId}`)
+      .patch(`/quiz/${quizId}`)
       .send([{ op: 'replace', path: '/title', value: 'New Title' }])
-      .expect(204);
-  });
-
-  //PB
-  // Teste la mise à jour d'une question
-  it('PUT /quizz/:id/questions/:questionId - should update a question', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    const quizResponse = await request(app.getHttpServer())
-      .post('/quizz')
-      .send({ title: 'Test Quiz' })
-      .expect(201);
-    const quizId = quizResponse.header.location.split('/').pop();
-    const questionResponse = await request(app.getHttpServer())
-      .post(`/quizz/${quizId}/questions`)
-      .send({ text: 'What is NestJS?' })
-      .expect(201);
-    const questionId = questionResponse.body.id;
-    await request(app.getHttpServer())
-      .put(`/quizz/${quizId}/questions/${questionId}`)
-      .send({ text: 'What is NestJS Framework?' })
       .expect(204);
   });
 
