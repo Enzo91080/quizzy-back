@@ -16,7 +16,6 @@ import { Response } from 'express';
 import { Auth } from '../modules/auth/auth.decorator';
 import { RequestWithUser } from '../modules/auth/model/request-with-user';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
-import { FindQuizzDto } from './dto/find-quizz';
 import { QuizzService } from './quizz.service';
 import {
   ApiTags,
@@ -29,6 +28,7 @@ import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdateTitleQuestionDto } from './dto/update-title-question.dto';
 import { QuizGateway } from './quizz.gateway';
+import { FindQuizzDto } from './dto/find-quizz';
 
 @ApiTags('Quizz') // 📌 Ajout d'une catégorie dans Swagger
 @Controller('quiz')
@@ -181,21 +181,30 @@ export class QuizzController {
     status: 200,
     description: 'Liste des quiz récupérée avec succès',
   })
-  async findAll(
-    @Req() request: RequestWithUser
-  ): Promise<{ data: FindQuizzDto[]; _links: { create: string } }> {
+  async findAll(@Req() request: RequestWithUser): Promise<{
+    data: (FindQuizzDto & { _links?: { start?: string } })[];
+    _links: { create: string };
+  }> {
     const userId = request.user.uid;
-    const quizzes = await this.quizzService.findAll(userId);
+    const quizzes = (await this.quizzService.findAll(userId)) as FindQuizzDto[];
     const baseUrl = `${request.protocol}://${request.get('host')}/api/quiz`;
 
+    const data = quizzes.map((quiz) => {
+      const isStartable = this.quizzService.canStartQuiz(quiz);
+      return {
+        ...quiz,
+        ...(isStartable && {
+          _links: {
+            start: `${baseUrl}/${quiz.id}/start`,
+          },
+        }),
+      };
+    });
+
     return {
-      data: quizzes.map((quiz) => {
-        return {
-          ...quiz,
-        };
-      }) as FindQuizzDto[],
+      data,
       _links: {
-        create: `${baseUrl}`,
+        create: baseUrl,
       },
     };
   }
@@ -251,7 +260,9 @@ export class QuizzController {
 
       return res.status(204).end();
     } catch (error) {
-      return res.status(500).json({ message: 'Error updating quiz title' });
+      return res
+        .status(500)
+        .json({ message: `Error updating quiz title: ${error}}` });
     }
   }
 
@@ -287,7 +298,9 @@ export class QuizzController {
 
       return res.status(204).end();
     } catch (error) {
-      return res.status(500).json({ message: 'Error updating question' });
+      return res
+        .status(500)
+        .json({ message: `Error updating question: ${error}` });
     }
   }
 

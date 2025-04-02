@@ -25,11 +25,4 @@ export class FindQuizzDto {
   @ApiProperty({ required: false, type: [QuestionDto] })
   @IsOptional()
   questions?: QuestionDto[];
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  _links?: {
-    create: string;
-    start?: string;
-  };
 }
