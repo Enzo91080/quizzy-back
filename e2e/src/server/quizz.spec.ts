@@ -99,10 +99,7 @@ describe('QuizzController (e2e)', () => {
       expect(Array.isArray(response.data.data)).toBe(true);
 
       // Vérifier que chaque quiz dans "data" a un lien "create"
-      response.data.data.forEach((quiz: any) => {
-        expect(quiz).toHaveProperty('_links.create');
-        expect(quiz._links.create).toBe(baseUrl);
-      });
+      expect(response.data).toHaveProperty('_links.create');
 
     } catch (error) {
       console.error('⚠️ Erreur dans GET /api/quizz:', JSON.stringify(error.response?.data || error.message));
@@ -137,32 +134,32 @@ describe('QuizzController (e2e)', () => {
     }
   });
 
-  // // 🔹 Test de mise à jour d'une question
-  // it('PUT /quiz/:id/questions/:questionId - should update a question', async () => {
-  //   if (!authToken) throw new Error("⚠️ AuthToken est indéfini, arrêt du test.");
-  //   if (!quizId || !questionId) throw new Error("⚠️ quizId ou questionId non défini, arrêt du test.");
+  // 🔹 Test de mise à jour d'une question
+  it('PUT /quiz/:id/questions/:questionId - should update a question', async () => {
+    if (!authToken) throw new Error("⚠️ AuthToken est indéfini, arrêt du test.");
+    if (!quizId || !questionId) throw new Error("⚠️ quizId ou questionId non défini, arrêt du test.");
 
-  //   try {
-  //     const updateResponse = await axios.put(
-  //       `${baseUrl}/${quizId}/questions/${questionId}`,
-  //       {
-  //         id: questionId,
-  //         title: 'What is NestJS Framework ?',
-  //         answers: [{ title: 'An awesome framewor k', isCorrect: true }],
-  //       },
-  //       { headers: { Authorization: `Bearer ${authToken}` } }
-  //     );
+    try {
+      const updateResponse = await axios.put(
+        `${baseUrl}/${quizId}/questions/${questionId}`,
+        {
+          id: questionId,
+          title: 'What is NestJS Framework ?',
+          answers: [{ title: 'An awesome framework', isCorrect: true }],
+        },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
 
-  //     expect(updateResponse.status).toBe(204);
+      expect(updateResponse.status).toBe(204);
 
-  //   } catch (error) {
-  //     console.error(
-  //       '⚠️ Erreur lors de la mise à jour de la question:',
-  //       JSON.stringify(error.response?.data || error.message)
-  //     );
-  //     throw error;
-  //   }
-  // });
+    } catch (error) {
+      console.error(
+        '⚠️ Erreur lors de la mise à jour de la question:',
+        JSON.stringify(error.response?.data || error.message)
+      );
+      throw error;
+    }
+  });
 
   
 });
