@@ -6,7 +6,7 @@ describe('QuizzController (e2e)', () => {
     let app: INestApplication;
     let authToken: string;
     let userId: string;
-    const baseUrl = 'http://localhost:3000/api/quizz';
+    const baseUrl = 'http://localhost:3000/api/quiz';
     beforeAll(async () => {
       try {
         const authResponse = await axios.post(
@@ -73,7 +73,6 @@ it('should return all quizzes with HATEOAS link', async () => {
       // Vérifie que la réponse a un code 200 OK
       expect(response.status).toBe(200);
 
-      
       // Vérifie la structure de la réponse
       expect(response.data).toHaveProperty('data');
       expect(Array.isArray(response.data.data)).toBe(true);
