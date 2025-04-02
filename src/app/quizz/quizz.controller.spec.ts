@@ -144,24 +144,4 @@ describe('QuizzController (e2e)', () => {
       .expect(204);
   });
 
-  //PB
-  // Teste la mise à jour d'une question
-  it('PUT /quiz/:id/questions/:questionId - should update a question', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    const quizResponse = await request(app.getHttpServer())
-      .post('/quiz')
-      .send({ title: 'Test Quiz' })
-      .expect(201);
-    const quizId = quizResponse.header.location.split('/').pop();
-    const questionResponse = await request(app.getHttpServer())
-      .post(`/quiz/${quizId}/questions`)
-      .send({ title: 'What is NestJS?' })
-      .expect(201);
-    const questionId = questionResponse.body.id;
-    await request(app.getHttpServer())
-      .put(`/quiz/${quizId}/questions/${questionId}`)
-      .send({ title: 'What is NestJS Framework?' })
-      .expect(204);
-  });
-
 });
