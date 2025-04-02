@@ -3,10 +3,10 @@ import axios from 'axios';
 describe('POST /api/users', () => {
   it('should return 201 if user is authenticated', async () => {
     const auth = await axios.post(
-      'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDIBKcmYN8CkFIQ4zWZpBmI1N3piflfqqM',
+      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4',
       {
-        email: 'fhemery@hemit.fr',
-        password: 'Test123!',
+        email: 'aniss@exemple.com',
+        password: '123456',
         returnSecureToken: true,
       }
     );
@@ -17,7 +17,11 @@ describe('POST /api/users', () => {
 
     const userResponse = await axios.post(
       '/api/users',
-      {},
+      {
+        email: 'aniss@exemple.com',
+        password: '123456',
+        returnSecureToken: true,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,

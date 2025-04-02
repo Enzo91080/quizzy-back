@@ -145,7 +145,7 @@ describe('QuizzController (e2e)', () => {
         {
           id: questionId,
           title: 'What is NestJS Framework ?',
-          answers: [{ title: 'An awesome framework', isCorrect: true }],
+          answers: [{ title: 'An awesome techno', isCorrect: true }],
         },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
