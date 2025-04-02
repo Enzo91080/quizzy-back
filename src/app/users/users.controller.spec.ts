@@ -37,8 +37,9 @@ describe('UsersController (integration)', () => {
   });
 
 
-  // Teste les routes authentifiées
   describe('Authenticated routes', () => {
+
+    //teste la creation d'un user
     it('POST /users - should create a user', async () => {
       const createUserDto = { username: 'testUser' };
       FakeAuthMiddleware.SetUser('test-uid');
@@ -50,7 +51,7 @@ describe('UsersController (integration)', () => {
     });
 
 
-    // Teste la route GET /users/me
+    // Teste la route GET /users/me, recuperation des donnees de l'user connecté
     it('GET /users/me - should return authenticated user info', async () => {
       FakeAuthMiddleware.SetUser('test-uid', 'test@example.com');
       const createUserDto = { username: 'testUser' };

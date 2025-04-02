@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 describe('GET /api/ping', () => {
+
   it('should return pong on get', async () => {
     const response = await axios.get('/api/ping');
 

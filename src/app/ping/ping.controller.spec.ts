@@ -3,7 +3,6 @@ import { PingController } from './ping.controller';
 import { VersionRepositoryService } from './version-repository.service';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { version } from 'os';
 
 describe('PingController UNIT TEST', () => {
   let controller: PingController;
