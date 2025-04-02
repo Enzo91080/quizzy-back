@@ -112,8 +112,8 @@ describe('QuizzController (e2e)', () => {
 
     try {
       const createQuizzDto = {
-        title: 'Test Quiz',
-        description: 'A test quiz description',
+        title: 'Mariam',
+        description: 'Mariam Quizz',
       };
 
       // Envoi de la requête pour créer un quiz

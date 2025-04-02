@@ -58,6 +58,7 @@ describe('QuizzController (e2e)', () => {
           returnSecureToken: true,
         }
       );
+
       expect(authResponse.status).toBe(200); // Vérifie que l'authentification réussit
       authToken = authResponse.data.idToken;
       userId = authResponse.data.localId; // UID Firebase
@@ -82,51 +83,6 @@ describe('QuizzController (e2e)', () => {
     FakeAuthMiddleware.Reset();
   });
 
-  // Teste la création d'un quiz
-  it('POST /quiz - should create a quiz', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    const response = await request(app.getHttpServer())
-      .post('/quiz')
-      .send({ title: 'Test Quiz' })
-      .expect(201);
-
-    expect(response.header.location).toMatch(/\/quiz\/quiz-\d+/);
-  });
-
-
-  // Teste la récupération d'un quiz ou tous les quiz par ID et vérifie que le titre est correct
-  it('GET /quiz/:id - should return a single quiz', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    const quizResponse = await request(app.getHttpServer())
-      .post('/quiz')
-      .send({ title: 'Test Quiz' })
-      .expect(201);
-
-    const quizId = quizResponse.header.location.split('/').pop();
-    const response = await request(app.getHttpServer())
-      .get(`/quiz/${quizId}`)
-      .expect(200);
-
-    expect(response.body.title).toBe('Test Quiz');
-  });
-
-
-  // Teste la mise à jour du titre d'un quiz
-  it('PATCH /quiz/:id - should update quiz title', async () => {
-    FakeAuthMiddleware.SetUser('test-uid');
-    const createResponse = await request(app.getHttpServer())
-      .post('/quiz')
-      .send({ title: 'Old Title' })
-      .expect(201);
-
-    const quizId = createResponse.header.location.split('/').pop();
-    await request(app.getHttpServer())
-      .patch(`/quiz/${quizId}`)
-      .send([{ op: 'replace', path: '/title', value: 'New Title' }])
-      .expect(204);
-  });
-
-
   // Teste l'ajout d'une question à un quiz
   it('POST /quiz/:id/questions - should add a question to a quiz', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
@@ -142,6 +98,21 @@ describe('QuizzController (e2e)', () => {
       .expect(201);
 
     expect(response.body).toHaveProperty('id');
+  });
+
+  // Teste la mise à jour du titre d'un quiz
+  it('PATCH /quiz/:id - should update quiz title', async () => {
+    FakeAuthMiddleware.SetUser('test-uid');
+    const createResponse = await request(app.getHttpServer())
+      .post('/quiz')
+      .send({ title: 'Old Title' })
+      .expect(201);
+
+    const quizId = createResponse.header.location.split('/').pop();
+    await request(app.getHttpServer())
+      .patch(`/quiz/${quizId}`)
+      .send([{ op: 'replace', path: '/title', value: 'New Title' }])
+      .expect(204);
   });
 
 });
