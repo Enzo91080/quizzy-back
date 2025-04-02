@@ -62,10 +62,10 @@ describe('QuizzController (e2e)', () => {
       expect(authResponse.status).toBe(200); // Vérifie que l'authentification réussit
       authToken = authResponse.data.idToken;
       userId = authResponse.data.localId; // UID Firebase
-      console.log("✅ Authentification réussie, UID reçu :", userId);
+      console.log("Authentification réussie, UID reçu :", userId);
     } catch (error) {
-      console.error('⚠️ Erreur d\'authentification:', JSON.stringify(error.response?.data || error.message));
-      throw new Error("⚠️ Impossible de s'authentifier.");
+      console.error('Erreur d\'authentification:', JSON.stringify(error.response?.data || error.message));
+      throw new Error("Impossible de s'authentifier.");
     }
   });
 

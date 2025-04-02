@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { INestApplication } from '@nestjs/common';
 
 describe('QuizzController (e2e)', () => {
   let authToken: string;
@@ -77,7 +76,6 @@ describe('QuizzController (e2e)', () => {
   });
 
 
-
   it('should return all quizzes with HATEOAS link', async () => {
     if (!authToken) {
       throw new Error("AuthToken est indéfini, arrêt du test.");
@@ -104,20 +102,17 @@ describe('QuizzController (e2e)', () => {
 
   it('POST /quiz - should create a quiz and return an ID', async () => {
     if (!authToken) throw new Error("Le token d'authentification est manquant.");
-
     try {
       const createQuizzDto = {
         title: 'Mariam',
         description: 'Mariam Quizz',
       };
-
       // Envoi de la requête pour créer un quiz
       const createResponse = await axios.post(
         baseUrl,
         createQuizzDto,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
-
       expect(createResponse.status).toBe(201);
       console.log("Réponse de la création du quiz :", createResponse.data);
 
@@ -133,7 +128,6 @@ describe('QuizzController (e2e)', () => {
   it('PUT /quiz/:id/questions/:questionId - should update a question', async () => {
     if (!authToken) throw new Error("AuthToken est indéfini, arrêt du test.");
     if (!quizId || !questionId) throw new Error("quizId ou questionId non défini, arrêt du test.");
-
     try {
       const updateResponse = await axios.put(
         `${baseUrl}/${quizId}/questions/${questionId}`,
