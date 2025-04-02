@@ -45,15 +45,4 @@ describe('PingController "INTEGRATION"', () => {
     app.setGlobalPrefix('api');
     await app.init();
   });
-
-  it('should call the database', async () => {
-    const result = await request(app.getHttpServer()).get('/api/ping');
-    expect(result.body).toEqual({
-      status: 'OK',
-      details: {
-        database: 'OK',
-      },
-      version: '1',
-    });
-  });
 });

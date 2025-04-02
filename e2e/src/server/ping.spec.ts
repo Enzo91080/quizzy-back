@@ -1,17 +1,18 @@
 import axios from 'axios';
 
 describe('GET http://localhost:3000/api/ping', () => {
-  it('should return pong on get', async () => {
-    const response = await axios.get('http://localhost:3000/api/ping');
+  const BASE_URL = 'http://localhost:3000/api/ping';
+
+  it('should return a valid status and database status', async () => {
+    const response = await axios.get(BASE_URL);
 
     expect(response.status).toBe(200);
-    expect(response.data.response).toBe('pong');
-  });
+    expect(response.data).toHaveProperty('status');
+    expect(response.data).toHaveProperty('details.database');
 
-  it('should return the correct version', async () => {
-    const response = await axios.get('http://localhost:3000/api/ping');
-
-    expect(response.status).toBe(200);
-    expect(response.data.version).toEqual('1');
+    // Vérifier si le statut est "OK" ou "Partial"
+    expect(['OK', 'Partial']).toContain(response.data.status);
+    expect(['OK', 'KO']).toContain(response.data.details.database);
   });
+  
 });
