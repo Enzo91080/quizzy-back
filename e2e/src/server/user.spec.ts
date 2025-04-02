@@ -17,7 +17,11 @@ describe('POST /api/users', () => {
 
     const userResponse = await axios.post(
       '/api/users',
-      {},
+      {
+        email: 'aniss@exemple.com',
+        password: '123456',
+        returnSecureToken: true,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,

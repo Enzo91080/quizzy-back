@@ -1,6 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateQuizzDto } from './create-quizz.dto';
+// --- update-quizz.dto.ts ---
+import { IsString } from 'class-validator';
 
 export class UpdateQuizzDto {
+    @IsString()
     title: string;
 }

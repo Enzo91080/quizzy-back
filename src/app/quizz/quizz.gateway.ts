@@ -9,6 +9,9 @@ import {
 import { Server, Socket } from 'socket.io';
 import { QuizzService } from './quizz.service';
 
+/**
+ * Passerelle WebSocket pour gérer les événements temps réel liés aux quiz
+ */
 @WebSocketGateway({ cors: true })
 export class QuizGateway implements OnGatewayConnection {
     @WebSocketServer()
@@ -20,10 +23,20 @@ export class QuizGateway implements OnGatewayConnection {
 
     constructor(private readonly quizzService: QuizzService) { }
 
+    /**
+     * Gestion de la connexion d'un client WebSocket
+     */
     handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);
     }
 
+    /**
+     * Lorsqu’un hôte rejoint une exécution avec son executionId
+     * - Le socket est stocké comme hôte
+     * - Il rejoint la room liée à l'exécution
+     * - On émet les détails du quiz à l'hôte
+     * - On notifie tous les clients de l'état "waiting"
+     */
     @SubscribeMessage('host')
     async handleHost(
         @MessageBody() payload: { executionId: string },
@@ -70,6 +83,12 @@ export class QuizGateway implements OnGatewayConnection {
         }
     }
 
+    /**
+     * Lorsqu’un participant rejoint une exécution
+     * - Le client rejoint la room
+     * - On lui envoie les détails du quiz
+     * - On notifie tous les clients du statut actuel (waiting ou started)
+     */
     @SubscribeMessage('join')
     async handleJoin(
         @MessageBody() payload: { executionId: string },
@@ -113,6 +132,12 @@ export class QuizGateway implements OnGatewayConnection {
         }
     }
 
+    /**
+     * Lorsqu’un hôte envoie "nextQuestion"
+     * - L’index de la question actuelle est avancé
+     * - La question suivante est envoyée à tous les clients
+     * - Le statut passe à "started"
+     */
     @SubscribeMessage('nextQuestion')
     async handleNextQuestion(
         @MessageBody() payload: { executionId: string },

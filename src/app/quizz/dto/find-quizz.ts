@@ -1,5 +1,7 @@
+// --- find-quizz.dto.ts ---
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
+import { QuestionDto } from './question.dto';
 
 export class FindQuizzDto {
   @ApiProperty()
@@ -11,41 +13,23 @@ export class FindQuizzDto {
   title: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
   description?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
   userId?: string;
 
-  @ApiProperty({ required: false, type: () => [QuestionDto] })
-  @IsString({ each: true })
-  questions?: {
-    title: string;
-    answers: { title: string; isCorrect: boolean }[];
-  }[];
-
+  @ApiProperty({ required: false, type: [QuestionDto] })
+  @IsOptional()
+  questions?: QuestionDto[];
 
   @ApiProperty({ required: false })
-  @IsString()
+  @IsOptional()
   _links?: {
     create: string;
     start?: string;
   };
-}
-
-class QuestionDto {
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty({ type: () => [AnswerDto] })
-  answers: { title: string; isCorrect: boolean }[];
-}
-
-class AnswerDto {
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty()
-  isCorrect: boolean;
 }

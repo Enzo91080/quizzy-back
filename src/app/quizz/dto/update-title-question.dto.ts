@@ -1,12 +1,13 @@
+// --- update-title-question.dto.ts ---
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTitleQuestionDto {
-    @ApiProperty({ example: 'replace', description: "Opération JSON Patch ('replace' attendu)" })
+    @ApiProperty({ example: 'replace' })
     op: string;
 
-    @ApiProperty({ example: '/title', description: 'Chemin de la propriété à modifier' })
+    @ApiProperty({ example: '/title' })
     path: string;
 
-    @ApiProperty({ example: 'Nouveau titre', description: 'Nouvelle valeur du titre' })
+    @ApiProperty({ example: 'Nouveau titre' })
     value: string;
 }
