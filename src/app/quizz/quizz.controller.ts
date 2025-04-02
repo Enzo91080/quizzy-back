@@ -12,11 +12,12 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/s
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { UpdateTitleQuestionDto } from './dto/update-title-question.dto';
+import { QuizGateway } from './quizz.gateway';
 
 @ApiTags('Quizz') // 📌 Ajout d'une catégorie dans Swagger
 @Controller('quiz')
 export class QuizzController {
-  constructor(private readonly quizzService: QuizzService) { }
+  constructor(private readonly quizzService: QuizzService, private readonly quizGateway: QuizGateway) { }
 
   @Post()
   @Auth()

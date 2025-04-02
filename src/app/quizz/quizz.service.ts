@@ -207,4 +207,13 @@ export class QuizzService {
     return executionId;
   }
 
+  async getExecutionById(executionId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
+    return this.fa.firestore.collection('executions').doc(executionId).get();
+  }
+
+  async getQuizById(quizId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
+    return this.fa.firestore.collection('quizzes').doc(quizId).get();
+  }
+
+
 }
