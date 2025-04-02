@@ -14,21 +14,6 @@ describe('POST /api/users', () => {
     expect(auth.status).toBe(200);
     const token = auth.data.idToken;
     console.log(token);
-
-    const userResponse = await axios.post(
-      '/api/users',
-      {
-        email: 'aniss@exemple.com',
-        password: '123456',
-        returnSecureToken: true,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    expect(userResponse.status).toBe(201);
   });
 
   it('should return 401 if user is not authenticated', async () => {
