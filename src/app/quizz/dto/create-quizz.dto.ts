@@ -1,6 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { CreateQuestionDto } from "./create-question.dto";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+// --- create-quizz.dto.ts ---
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { QuestionDto } from './question.dto';
 
 export class CreateQuizzDto {
     @ApiProperty()
@@ -9,16 +11,15 @@ export class CreateQuizzDto {
     title: string;
 
     @ApiProperty()
-    @IsString()
     @IsOptional()
-    description: string;
+    @IsString()
+    description?: string;
 }
 
 export class CreateQuizzWithQuestionsDto extends CreateQuizzDto {
-    @ApiProperty({ type: [CreateQuestionDto] })
-    questions: CreateQuestionDto[];
+    @ApiProperty({ type: [QuestionDto] })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => QuestionDto)
+    questions: QuestionDto[];
 }
-
-
-
-
