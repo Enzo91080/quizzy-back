@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { CreateQuizzDto } from './dto/create-quizz.dto';
 import { UpdateQuizzDto } from './dto/update-quizz.dto';
 import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
-import { Question } from './entities/question.entity';
 import { FindQuizzDto } from './dto/find-quizz';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
@@ -13,12 +12,15 @@ import { randomBytes } from 'crypto';
 
 @Injectable()
 export class QuizzService {
-  constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) { }
+  constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) {}
 
   /**
    * Créer un quiz
    */
-  async create(createQuizzDto: CreateQuizzDto, userId: string): Promise<string> {
+  async create(
+    createQuizzDto: CreateQuizzDto,
+    userId: string
+  ): Promise<string> {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizId = quizzesCollection.doc().id;
     await quizzesCollection.doc(quizId).set({
@@ -36,7 +38,9 @@ export class QuizzService {
    */
   async findAll(userId: string) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
-    const userQuizzes = await quizzesCollection.where('userId', '==', userId).get();
+    const userQuizzes = await quizzesCollection
+      .where('userId', '==', userId)
+      .get();
     return userQuizzes.docs.map((quiz) => ({ ...quiz.data(), id: quiz.id }));
   }
 
@@ -71,7 +75,10 @@ export class QuizzService {
       await quizzesCollection.doc(id).update({ title });
       return true;
     } catch (error) {
-      console.error(`Erreur lors de la mise à jour du titre du quiz ${id}:`, error);
+      console.error(
+        `Erreur lors de la mise à jour du titre du quiz ${id}:`,
+        error
+      );
       throw new Error('Erreur lors de la mise à jour du titre du quiz.');
     }
   }
@@ -79,19 +86,28 @@ export class QuizzService {
   /**
    * Ajouter une question à un quiz (et sérialiser les objets)
    */
-  async addQuestionToQuiz(quizId: string, userId: string, questionData: CreateQuestionDto) {
+  async addQuestionToQuiz(
+    quizId: string,
+    userId: string,
+    questionData: CreateQuestionDto
+  ) {
     const quizzesCollection = this.fa.firestore.collection('quizzes');
     const quizDoc = await quizzesCollection.doc(quizId).get();
     if (!quizDoc.exists) throw new Error('Quiz not found or unauthorized');
     const quizData = quizDoc.data();
-    if (quizData.userId !== userId) throw new Error('Quiz not found or unauthorized');
+    if (quizData.userId !== userId)
+      throw new Error('Quiz not found or unauthorized');
 
     const questionId = this.fa.firestore.collection('quizzes').doc().id;
     const plainQuestion = instanceToPlain({ id: questionId, ...questionData });
-    const updatedQuestions = quizData.questions ? [...quizData.questions, plainQuestion] : [plainQuestion];
+    const updatedQuestions = quizData.questions
+      ? [...quizData.questions, plainQuestion]
+      : [plainQuestion];
 
     try {
-      await quizzesCollection.doc(quizId).update({ questions: updatedQuestions });
+      await quizzesCollection
+        .doc(quizId)
+        .update({ questions: updatedQuestions });
       return questionId;
     } catch (error) {
       console.error('Erreur lors de l’ajout de la question :', error);
@@ -106,7 +122,7 @@ export class QuizzService {
     quizId: string,
     userId: string,
     questionId: string,
-    questionData: UpdateQuestionDto,
+    questionData: UpdateQuestionDto
   ): Promise<boolean> {
     const quizRef = this.fa.firestore.collection('quizzes').doc(quizId);
     const quizSnap = await quizRef.get();
@@ -117,13 +133,16 @@ export class QuizzService {
     const updatedQuestions = (quiz.questions || []).map((q: any) =>
       q.id === questionId ? { ...q, ...questionData } : q
     );
-    const plainQuestions = updatedQuestions.map(q => instanceToPlain(q));
+    const plainQuestions = updatedQuestions.map((q) => instanceToPlain(q));
 
     try {
       await quizRef.update({ questions: plainQuestions });
       return true;
     } catch (error) {
-      console.error(`Erreur MAJ question ${questionId} dans quiz ${quizId}:`, error);
+      console.error(
+        `Erreur MAJ question ${questionId} dans quiz ${quizId}:`,
+        error
+      );
       throw new Error('Erreur lors de la mise à jour de la question');
     }
   }
@@ -167,7 +186,9 @@ export class QuizzService {
     const quizData = quizDoc.data();
     if (quizData.userId !== userId) throw new Error('QUIZ_NOT_FOUND');
 
-    if (!this.canStartQuiz({ ...quizData, id: quizId, title: quizData.title })) {
+    if (
+      !this.canStartQuiz({ ...quizData, id: quizId, title: quizData.title })
+    ) {
       throw new Error('QUIZ_NOT_READY');
     }
 
@@ -186,14 +207,18 @@ export class QuizzService {
   /**
    * Récupère une exécution par son ID
    */
-  async getExecutionById(executionId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
+  async getExecutionById(
+    executionId: string
+  ): Promise<FirebaseFirestore.DocumentSnapshot> {
     return this.fa.firestore.collection('executions').doc(executionId).get();
   }
 
   /**
    * Récupère un quiz par son ID
    */
-  async getQuizById(quizId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
+  async getQuizById(
+    quizId: string
+  ): Promise<FirebaseFirestore.DocumentSnapshot> {
     return this.fa.firestore.collection('quizzes').doc(quizId).get();
   }
 }
