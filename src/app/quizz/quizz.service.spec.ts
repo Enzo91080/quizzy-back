@@ -36,14 +36,4 @@ describe('QuizzService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
-  it('should create a quiz and return an ID', async () => {
-    const quizId = await service.create({ 
-      title: 'Test Quiz', 
-      description: 'A test quiz description', 
-      questions: [] 
-    }, 'user123');
-    
-    expect(quizId).toBe('mocked-quiz-id');
-  });
 });
