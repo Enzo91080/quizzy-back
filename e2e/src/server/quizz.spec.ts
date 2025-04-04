@@ -63,6 +63,27 @@ describe('QuizzController (e2e)', () => {
     questionId = questionRes.data.id;
   });
 
+
+  // test la recuperation d'un quiz par id (issue 7)
+  it('GET /quiz/:id - should return a specific quiz by id (issue 7)', async () => {
+    const createResponse = await axios.post(
+      baseUrl,
+      { title: 'Quiz à récupérer', description: 'Description' },
+      { headers: headers() }
+    );
+    const quizUrl = createResponse.headers.location;
+    const quizId = quizUrl.split('/').pop();
+
+    const getRes = await axios.get(`${baseUrl}/${quizId}`, {
+      headers: headers(),
+    });
+
+    expect(getRes.status).toBe(200);
+    expect(getRes.data).toHaveProperty('id');
+    expect(getRes.data.title).toBe('Quiz à récupérer');
+  });
+
+
   // test la récupération de tous les quiz avec le lien HATEOAS (issue 5_12)
   it('GET /api/quiz - should return all quizzes with HATEOAS link (issue 5_12)', async () => {
     const res = await axios.get(baseUrl, { headers: headers() });
@@ -112,4 +133,38 @@ describe('QuizzController (e2e)', () => {
 
     expect(res.status).toBe(204);
   });
+
+
+  // test l'execution d'un quiz (issue 14)
+  it('POST /quiz/:id/start - should start a quiz execution and return location', async () => {
+    const quizResponse = await axios.post(
+      baseUrl,
+      { title: 'Quiz à démarrer', description: 'Startable quiz' },
+      { headers: headers() }
+    );
+    const quizId = quizResponse.headers.location.split('/').pop();
+
+    // Ajoute une question pour que le quiz soit "startable"
+    await axios.post(
+      `${baseUrl}/${quizId}/questions`,
+      {
+        title: 'Une question pour le start',
+        answers: [
+          { title: 'Bonne', isCorrect: true },
+          { title: 'Fausse', isCorrect: false },
+        ],
+      },
+      { headers: headers() }
+    );
+
+    const startRes = await axios.post(`${baseUrl}/${quizId}/start`, null, {
+      headers: headers(),
+    });
+
+    expect(startRes.status).toBe(201);
+    expect(startRes.headers).toHaveProperty('location');
+    expect(startRes.headers.location).toMatch(/\/execution\//);
+  });
+
+
 });

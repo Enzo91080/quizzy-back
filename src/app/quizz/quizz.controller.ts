@@ -234,7 +234,7 @@ export class QuizzController {
   }
 
   /**
-   * Methode pour récupérer les questions d'un quiz
+   * Methode pour mettre à jour le titre d’un quiz
    */
   @Patch(':id')
   @Auth()
@@ -285,7 +285,7 @@ export class QuizzController {
   }
 
   /**
-   * Methode pour récupérer les questions d'un quiz
+   * Methode pour mettre à jour une question dans un quiz
    */
   @Put(':id/questions/:questionId')
   @Auth()
