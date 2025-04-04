@@ -21,7 +21,7 @@ describe('QuizzController (e2e)', () => {
   });
 
   beforeAll(async () => {
-    // 🔐 Authentification Firebase
+    // Authentification Firebase
     const { data: authData } = await axios.post(firebaseAuthUrl, credentials);
     authToken = authData.idToken;
     userId = authData.localId;
@@ -30,7 +30,7 @@ describe('QuizzController (e2e)', () => {
       throw new Error("Authentication failed");
     }
 
-    // 🧪 Création du quiz
+    // Création du quiz
     const quizRes = await axios.post(
       baseUrl,
       {
@@ -41,12 +41,12 @@ describe('QuizzController (e2e)', () => {
     );
     expect(quizRes.status).toBe(201);
 
-    // 🎯 Récupération du quizId depuis l’en-tête Location
+    // Récupération du quizId depuis l’en-tête Location
     const location = quizRes.headers.location;
     quizId = location.split('/').pop();
     if (!quizId) throw new Error('QuizId introuvable via Location header');
 
-    // 🧩 Ajout d'une question
+    //  Ajout d'une question
     const questionRes = await axios.post(
       `${baseUrl}/${quizId}/questions`,
       {
@@ -63,7 +63,8 @@ describe('QuizzController (e2e)', () => {
     questionId = questionRes.data.id;
   });
 
-  it('GET /api/quiz - should return all quizzes with HATEOAS link', async () => {
+  // test la récupération de tous les quiz avec le lien HATEOAS (issue 5_12)
+  it('GET /api/quiz - should return all quizzes with HATEOAS link (issue 5_12)', async () => {
     const res = await axios.get(baseUrl, { headers: headers() });
     expect(res.status).toBe(200);
     expect(res.data).toHaveProperty('data');
@@ -71,7 +72,8 @@ describe('QuizzController (e2e)', () => {
     expect(res.data).toHaveProperty('_links.create');
   });
 
-  it('GET /api/quiz - should return startable quiz links', async () => {
+  //test que le quiz est bien startable (issue 13)
+  it('GET /api/quiz - should return startable quiz links (issue 13)', async () => {
     const res = await axios.get(baseUrl, { headers: headers() });
     expect(res.status).toBe(200);
 
@@ -80,7 +82,8 @@ describe('QuizzController (e2e)', () => {
     expect(quiz._links?.start).toBeDefined();
   });
 
-  it('POST /quiz - should create a new quiz and return a Location header', async () => {
+  //test la creation d'un quiz (issue 6)
+  it('POST /quiz - should create a new quiz and return a Location header (issue 6)', async () => {
     const res = await axios.post(
       baseUrl,
       { title: 'Mariam', description: 'Mariam Quizz' },
@@ -91,7 +94,8 @@ describe('QuizzController (e2e)', () => {
     expect(res.headers).toHaveProperty('location');
   });
 
-  it('PUT /quiz/:id/questions/:questionId - should update a question', async () => {
+  // test la recuperation de l'id d'une question et modification d'une question (issue 11)
+  it('PUT /quiz/:id/questions/:questionId - should update a question (issue 11)', async () => {
     const res = await axios.put(
       `${baseUrl}/${quizId}/questions/${questionId}`,
       {
