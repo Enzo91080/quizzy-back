@@ -31,6 +31,16 @@ export class QuizGateway implements OnGatewayConnection {
     }
 
     /**
+     * Calcule le nombre de participants (exclut l'hôte)
+     */
+    private getParticipantCount(executionId: string): number {
+        const room = `execution_${executionId}`;
+        const roomSockets = this.server.sockets.adapter.rooms.get(room) || new Set();
+        const hostSocket = this.hostSockets.get(executionId);
+        return Array.from(roomSockets).filter(socketId => socketId !== hostSocket?.id).length;
+    }
+
+    /**
      * Lorsqu’un hôte rejoint une exécution avec son executionId
      * - Le socket est stocké comme hôte
      * - Il rejoint la room liée à l'exécution
@@ -71,8 +81,7 @@ export class QuizGateway implements OnGatewayConnection {
                 },
             });
 
-            const participantCount = this.server.sockets.adapter.rooms.get(room)?.size || 1;
-
+            const participantCount = this.getParticipantCount(executionId);
             this.server.to(room).emit('status', {
                 status: 'waiting',
                 participants: participantCount,
@@ -119,7 +128,7 @@ export class QuizGateway implements OnGatewayConnection {
                 quizTitle: quizData.title,
             });
 
-            const participantCount = this.server.sockets.adapter.rooms.get(room)?.size || 1;
+            const participantCount = this.getParticipantCount(executionId);
             const status = this.quizStatus.get(executionId) ?? 'waiting';
 
             this.server.to(room).emit('status', {
@@ -173,8 +182,7 @@ export class QuizGateway implements OnGatewayConnection {
             this.currentQuestionIndex.set(executionId, currentIndex + 1);
             this.quizStatus.set(executionId, 'started');
 
-            const participantCount = this.server.sockets.adapter.rooms.get(room)?.size || 1;
-
+            const participantCount = this.getParticipantCount(executionId);
             this.server.to(room).emit('status', {
                 status: 'started',
                 participants: participantCount,
