@@ -43,7 +43,7 @@ class FakeQuizzService {
   }
 }
 
-describe('QuizzController (e2e)', () => {
+describe('QuizzController (test d integration)', () => {
   let app: INestApplication;
   let authToken: string;
   let userId: string;
@@ -61,7 +61,7 @@ describe('QuizzController (e2e)', () => {
 
       expect(authResponse.status).toBe(200); // Vérifie que l'authentification réussit
       authToken = authResponse.data.idToken;
-      userId = authResponse.data.localId; // UID Firebase
+      userId = authResponse.data.localId;
       console.log("Authentification réussie, UID reçu :", userId);
     } catch (error) {
       console.error('Erreur d\'authentification:', JSON.stringify(error.response?.data || error.message));
@@ -83,8 +83,8 @@ describe('QuizzController (e2e)', () => {
     FakeAuthMiddleware.Reset();
   });
 
-  // Teste l'ajout d'une question à un quiz
-  it('POST /quiz/:id/questions - should add a question to a quiz', async () => {
+  // Teste l'ajout d'une question à un quiz ((issue 9))
+  it('POST /quiz/:id/questions - should add a question to a quiz (issue 9)', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const quizResponse = await request(app.getHttpServer())
       .post('/quiz')
@@ -100,8 +100,8 @@ describe('QuizzController (e2e)', () => {
     expect(response.body).toHaveProperty('id');
   });
 
-  // Teste la mise à jour du titre d'un quiz
-  it('PATCH /quiz/:id - should update quiz title', async () => {
+  // Teste la mise à jour du titre d'un quiz ((issue 8))
+  it('PATCH /quiz/:id - should update quiz title (issue 8)', async () => {
     FakeAuthMiddleware.SetUser('test-uid');
     const createResponse = await request(app.getHttpServer())
       .post('/quiz')

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PingController } from './ping.controller';
 import { VersionRepositoryService } from './version-repository.service';
 
-describe('PingController UNIT TEST', () => {
+describe('PingController', () => {
   let controller: PingController;
 
   beforeEach(async () => {

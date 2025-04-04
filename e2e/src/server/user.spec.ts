@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-describe('POST /api/users', () => {
+//Test de la route POST users et de l'authentification (issue 3 et 4)
+describe('POST /api/users (e2e)', () => {
   it('should return 200 if user is authenticated', async () => {
     const auth = await axios.post(
       'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAV_PMyz1vM88Veq-q74rjINtgGSgNPDO4',

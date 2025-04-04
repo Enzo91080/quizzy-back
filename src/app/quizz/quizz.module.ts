@@ -5,7 +5,7 @@ import { QuizGateway } from './quizz.gateway';
 
 @Module({
   controllers: [QuizzController],
-  providers: [QuizzService, QuizGateway], // 👈 Ajouter ici
-  exports: [QuizzService, QuizGateway], // 👈 Exporter le service et le gateway
+  providers: [QuizzService, QuizGateway],
+  exports: [QuizzService, QuizGateway],
 })
 export class QuizzModule { }

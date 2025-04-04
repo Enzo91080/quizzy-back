@@ -30,14 +30,17 @@ import { UpdateTitleQuestionDto } from './dto/update-title-question.dto';
 import { QuizGateway } from './quizz.gateway';
 import { FindQuizzDto } from './dto/find-quizz';
 
-@ApiTags('Quizz') // 📌 Ajout d'une catégorie dans Swagger
+@ApiTags('Quizz') // Ajout d'une catégorie dans Swagger
 @Controller('quiz')
 export class QuizzController {
   constructor(
     private readonly quizzService: QuizzService,
     private readonly quizGateway: QuizGateway
-  ) {}
+  ) { }
 
+  /**
+   * Methode pour créer un quiz
+   */
   @Post()
   @Auth()
   @ApiOperation({ summary: 'Créer un nouveau quiz' })
@@ -71,6 +74,9 @@ export class QuizzController {
     }
   }
 
+  /**
+   * Methode pour ajouter une question à un quiz
+   */
   @Post(':id/questions')
   @Auth()
   @ApiOperation({ summary: 'Ajouter une question à un quiz' })
@@ -120,6 +126,9 @@ export class QuizzController {
     }
   }
 
+  /**
+   * Methode pour démarrer une exécution de quiz
+   */
   @Post(':id/start')
   @Auth()
   @ApiOperation({ summary: 'Démarrer une exécution de quiz' })
@@ -172,6 +181,9 @@ export class QuizzController {
     }
   }
 
+  /**
+   * Methode pour récupérer tous les quiz de l'utilisateur authentifié
+   */
   @Get()
   @Auth()
   @ApiOperation({
@@ -209,6 +221,9 @@ export class QuizzController {
     };
   }
 
+  /**
+   * Methode pour récupérer un quiz spécifique
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un quiz spécifique' })
   @ApiParam({ name: 'id', description: 'ID du quiz' })
@@ -218,12 +233,15 @@ export class QuizzController {
     return this.quizzService.findOne(id);
   }
 
+  /**
+   * Methode pour récupérer les questions d'un quiz
+   */
   @Patch(':id')
   @Auth()
   @ApiOperation({ summary: 'Mettre à jour le titre d’un quiz' })
   @ApiParam({ name: 'id', description: 'ID du quiz' })
   @ApiBody({
-    type: [UpdateTitleQuestionDto], // ✅ Swagger comprend maintenant que c'est un tableau d'objets
+    type: [UpdateTitleQuestionDto],
     description: 'Liste des opérations JSON Patch pour modifier le titre',
   })
   @ApiResponse({ status: 204, description: 'Titre mis à jour' })
@@ -231,7 +249,7 @@ export class QuizzController {
   @ApiResponse({ status: 404, description: 'Quiz non trouvé' })
   async updateTitle(
     @Param('id') id: string,
-    @Body() operations: UpdateTitleQuestionDto[], // ✅ Type explicitement défini
+    @Body() operations: UpdateTitleQuestionDto[],
     @Req() request: RequestWithUser,
     @Res() res: Response
   ) {
@@ -266,6 +284,9 @@ export class QuizzController {
     }
   }
 
+  /**
+   * Methode pour récupérer les questions d'un quiz
+   */
   @Put(':id/questions/:questionId')
   @Auth()
   @ApiOperation({ summary: 'Mettre à jour une question dans un quiz' })
@@ -304,6 +325,9 @@ export class QuizzController {
     }
   }
 
+  /**
+   * Methode pour supprimer une question d'un quiz
+   */
   @Delete(':id')
   @ApiOperation({ summary: 'Supprimer un quiz' })
   @ApiParam({ name: 'id', description: 'ID du quiz' })

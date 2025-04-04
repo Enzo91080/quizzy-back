@@ -15,7 +15,7 @@ export class PingController {
         databaseStatus = 'OK';
       }
     } catch (error) {
-      console.error('❌ Erreur de connexion à Firebase:', error);
+      console.error('Erreur de connexion à Firebase:', error);
     }
 
     return {

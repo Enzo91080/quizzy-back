@@ -7,6 +7,9 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+  /**
+   * Methode pour créer un utilisateur
+   */
   @Post()
   @Auth()
   @HttpCode(HttpStatus.CREATED)
@@ -19,6 +22,9 @@ export class UsersController {
     await this.usersService.createUser(uid, username);
   }
 
+  /**
+   * Methode pour recuperer les donnees de l'utilisateur connecté 
+   */
   @Get('/me')
   @Auth()
   async getMe(@Req() request: RequestWithUser) {

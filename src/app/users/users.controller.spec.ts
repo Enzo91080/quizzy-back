@@ -39,8 +39,8 @@ describe('UsersController (integration)', () => {
 
   describe('Authenticated routes', () => {
 
-    //teste la creation d'un user
-    it('POST /users - should create a user', async () => {
+    //teste la creation d'un user ((issue 3))
+    it('POST /users - should create a user (issue 3)', async () => {
       const createUserDto = { username: 'testUser' };
       FakeAuthMiddleware.SetUser('test-uid');
 
@@ -50,9 +50,8 @@ describe('UsersController (integration)', () => {
         .expect(201);
     });
 
-
-    // Teste la route GET /users/me, recuperation des donnees de l'user connecté
-    it('GET /users/me - should return authenticated user info', async () => {
+    // Teste la route GET /users/me, recuperation des donnees de l'user connecté ((issue 4))
+    it('GET /users/me - should return authenticated user info (issue 4)', async () => {
       FakeAuthMiddleware.SetUser('test-uid', 'test@example.com');
       const createUserDto = { username: 'testUser' };
       await request(app.getHttpServer())
@@ -71,12 +70,10 @@ describe('UsersController (integration)', () => {
       });
     });
 
-
     // Teste la route POST /users/me si le token est invalide
     it('GET /users/me - should return 401 if no token provided', async () => {
       await request(app.getHttpServer()).get('/users/me').expect(401);
     });
-
 
     // Teste la route POST /users avec un token invalide
     it('POST /users - should return 401 if token is invalid', async () => {

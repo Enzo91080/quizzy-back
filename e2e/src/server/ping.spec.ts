@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+//test de la route ping et connexion à la base de données (issue 1 et 2)
 describe('GET http://localhost:3000/api/ping', () => {
   const BASE_URL = 'http://localhost:3000/api/ping';
 
@@ -14,5 +15,5 @@ describe('GET http://localhost:3000/api/ping', () => {
     expect(['OK', 'Partial']).toContain(response.data.status);
     expect(['OK', 'KO']).toContain(response.data.details.database);
   });
-  
+
 });
