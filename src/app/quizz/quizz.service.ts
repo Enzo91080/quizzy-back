@@ -5,14 +5,12 @@ import { FirebaseAdmin, InjectFirebaseAdmin } from 'nestjs-firebase';
 import { FindQuizzDto } from './dto/find-quizz';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-import { StartableQuizDto } from './dto/startable-quizz.dto';
-import { instanceToPlain, plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { instanceToPlain } from 'class-transformer';
 import { randomBytes } from 'crypto';
 
 @Injectable()
 export class QuizzService {
-  constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) {}
+  constructor(@InjectFirebaseAdmin() private readonly fa: FirebaseAdmin) { }
 
   /**
    * Créer un quiz
@@ -166,13 +164,34 @@ export class QuizzService {
   }
 
   /**
-   * Vérifie si un quiz est prêt à être démarré
-   */
-  async canStartQuiz(quiz: FindQuizzDto): Promise<boolean> {
-    const dto = plainToInstance(StartableQuizDto, quiz);
-    const errors = await validate(dto, { whitelist: true });
-    return errors.length === 0;
+  * Vérifie si un quiz est prêt à être démarré
+  */
+  canStartQuiz(quiz: FindQuizzDto): boolean {
+    if (!quiz.title || quiz.title.trim() === '') {
+      return false; // Le titre est vide
+    }
+
+    if (!quiz.questions || quiz.questions.length === 0) {
+      return false; // Pas de questions
+    }
+
+    for (const question of quiz.questions) {
+      if (!question.title || question.title.trim() === '') {
+        return false; // Question sans titre
+      }
+
+      if (!question.answers || question.answers.length < 2) {
+        return false; // Moins de deux réponses
+      }
+
+      const correctAnswers = question.answers.filter(answer => answer.isCorrect);
+      if (correctAnswers.length !== 1) {
+        return false; // Pas exactement une réponse correcte
+      }
+    }
+    return true;
   }
+
 
   /**
    * Démarre une exécution de quiz
