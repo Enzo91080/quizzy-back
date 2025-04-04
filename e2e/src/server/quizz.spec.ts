@@ -64,23 +64,52 @@ describe('QuizzController (e2e)', () => {
   });
 
 
-  // test la recuperation d'un quiz par id (issue 7)
-  it('GET /quiz/:id - should return a specific quiz by id (issue 7)', async () => {
-    const createResponse = await axios.post(
+  // test la recuperation d'un quiz par id (issue 7_10)
+  it('GET /quiz/:id - should return details of a specific quiz including its questions (issue 7_10)', async () => {
+    // 1. Crée un quiz
+    const quizRes = await axios.post(
       baseUrl,
-      { title: 'Quiz à récupérer', description: 'Description' },
+      {
+        title: 'Quiz détaillé',
+        description: 'Avec questions',
+      },
       { headers: headers() }
     );
-    const quizUrl = createResponse.headers.location;
-    const quizId = quizUrl.split('/').pop();
 
+    const quizId = quizRes.headers.location.split('/').pop();
+
+    // 2. Ajoute une ou plusieurs questions au quiz
+    await axios.post(
+      `${baseUrl}/${quizId}/questions`,
+      {
+        title: 'Quelle est la capitale de la France ?',
+        answers: [
+          { title: 'Paris', isCorrect: true },
+          { title: 'Lyon', isCorrect: false },
+        ],
+      },
+      { headers: headers() }
+    );
+
+    // 3. Récupère le quiz par son ID
     const getRes = await axios.get(`${baseUrl}/${quizId}`, {
       headers: headers(),
     });
 
     expect(getRes.status).toBe(200);
-    expect(getRes.data).toHaveProperty('id');
-    expect(getRes.data.title).toBe('Quiz à récupérer');
+    const quiz = getRes.data;
+
+    expect(quiz).toHaveProperty('id', quizId);
+    expect(quiz).toHaveProperty('title', 'Quiz détaillé');
+    expect(quiz).toHaveProperty('description', 'Avec questions');
+    expect(quiz).toHaveProperty('questions');
+    expect(Array.isArray(quiz.questions)).toBe(true);
+    expect(quiz.questions.length).toBeGreaterThan(0);
+
+    const question = quiz.questions[0];
+    expect(question).toHaveProperty('title', 'Quelle est la capitale de la France ?');
+    expect(Array.isArray(question.answers)).toBe(true);
+    expect(question.answers.length).toBe(2);
   });
 
 
