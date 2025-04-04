@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 describe('QuizzController (e2e)', () => {
   let authToken: string;
   let userId: string;
@@ -17,7 +18,6 @@ describe('QuizzController (e2e)', () => {
           returnSecureToken: true,
         }
       );
-      console.log("Authentification réussie - Status:", authResponse.status, "ID Token:", authResponse.data.idToken);
 
       expect(authResponse.status).toBe(200);
       authToken = authResponse.data.idToken;
@@ -29,8 +29,6 @@ describe('QuizzController (e2e)', () => {
       const quizResponse = await axios.get(baseUrl, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-
-      console.log("Quizzes récupérés - Status:", quizResponse.status, "Data:", JSON.stringify(quizResponse.data));
 
       expect(quizResponse.status).toBe(200);
 
@@ -45,13 +43,9 @@ describe('QuizzController (e2e)', () => {
 
       quizId = quizWithQuestions.id;
 
-      console.log("quizId récupéré:", quizId);
-
       const questionResponse = await axios.get(`${baseUrl}/${quizId}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-
-      console.log("Questions récupérées - Status:", questionResponse.status, "Data:", JSON.stringify(questionResponse.data));
 
       expect(questionResponse.status).toBe(200);
 
@@ -62,8 +56,6 @@ describe('QuizzController (e2e)', () => {
       }
 
       questionId = questions[0].id;
-
-      console.log("questionId récupéré:", questionId);
 
       // Vérification finale des variables
       if (!quizId || !questionId) {
@@ -77,7 +69,7 @@ describe('QuizzController (e2e)', () => {
     }
   });
 
-  it('should return all quizzes with HATEOAS link', async () => {
+  it('GET api/quiz - should return all quizzes with HATEOAS link', async () => {
     if (!authToken) {
       throw new Error("AuthToken est indéfini, arrêt du test.");
     }
@@ -100,6 +92,52 @@ describe('QuizzController (e2e)', () => {
     }
   });
 
+  // Retourne la liste des quizz startable 
+  it('GET /api/quiz - it should return startable quizz links', async () => {
+    if (!authToken) {
+      throw new Error("AuthToken est indéfini, arrêt du test.");
+    }
+    try {
+      const response = await axios.get(baseUrl, {
+        headers: { Authorization: `Bearer ${authToken}` },
+        timeout: 10000
+      });
+      expect(response.status).toBe(200);
+      const quizzes = response.data.data;
+
+
+      quizzes.forEach((quiz: any) => {
+
+        expect(quiz.title).toBeDefined();
+        expect(quiz.title).not.toBe('');
+
+        if (Array.isArray(quiz.questions) && quiz.questions.length > 0) {
+          quiz.questions.forEach((question: any) => {
+
+            expect(question.title).toBeDefined();
+            expect(question.title).not.toBe('');
+
+            expect(Array.isArray(question.answers)).toBe(true);
+            expect(question.answers.length).toBeGreaterThanOrEqual(2);
+
+            const correctAnswers = question.answers.filter((answer: any) => answer.isCorrect);
+            expect(correctAnswers.length).toBe(1);
+          });
+
+          if (quiz._links && quiz._links.start) {
+            expect(quiz._links.start).toBeDefined();
+            expect(quiz._links.start).not.toBe('');
+          }
+        } else {
+          expect(quiz._links && quiz._links.start).toBeUndefined();
+        }
+      });
+    } catch (error) {
+      console.error('Erreur dans GET /api/quiz:', JSON.stringify(error.response?.data || error.message));
+      throw new Error(error.response?.data?.message || error.message);
+    }
+  });
+
   it('POST /quiz - should create a quiz and return an ID', async () => {
     if (!authToken) throw new Error("Le token d'authentification est manquant.");
     try {
@@ -114,8 +152,6 @@ describe('QuizzController (e2e)', () => {
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       expect(createResponse.status).toBe(201);
-      console.log("Réponse de la création du quiz :", createResponse.data);
-
       quizId = createResponse.data.id; // Stocker l'ID du quiz créé
 
     } catch (error) {
@@ -134,7 +170,7 @@ describe('QuizzController (e2e)', () => {
         {
           id: questionId,
           title: 'Update Question',
-          answers: [{ title: 'Update Answers', isCorrect: true }, { title: 'Update answers n°2', isCorrect: true }],
+          answers: [{ title: 'Update Answers n°1', isCorrect: true }, { title: 'Update answers n°2', isCorrect: false }, { title: 'Update answers n°3', isCorrect: false }],
         },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
@@ -149,5 +185,6 @@ describe('QuizzController (e2e)', () => {
       throw error;
     }
   });
+
 
 });
