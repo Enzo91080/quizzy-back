@@ -98,7 +98,11 @@ describe('QuizzController (test d integration)', () => {
       .expect(201);
 
     expect(response.body).toHaveProperty('id');
+
   });
+
+
+
 
   // Teste la mise à jour du titre d'un quiz ((issue 8))
   it('PATCH /quiz/:id - should update quiz title (issue 8)', async () => {
@@ -113,6 +117,39 @@ describe('QuizzController (test d integration)', () => {
       .patch(`/quiz/${quizId}`)
       .send([{ op: 'replace', path: '/title', value: 'New Title' }])
       .expect(204);
+
+    const getResponse = await request(app.getHttpServer())
+      .get(`/quiz/${quizId}`)
+      .expect(200);
+
+    expect(getResponse.body.title).toBe('New Title');
+  });
+
+  //cas d'erreur : quiz non trouvé
+  it('PATCH /quiz/:id - should return 404 if quiz does not exist', async () => {
+    FakeAuthMiddleware.SetUser('test-uid');
+
+    await request(app.getHttpServer())
+      .patch('/quiz/nonexistent-id')
+      .send([{ op: 'replace', path: '/title', value: 'Whatever' }])
+      .expect(404);
+  });
+
+  // cas d'erreur : chemin d'accès non valide
+  it('PATCH /quiz/:id - should return 400 for invalid patch operation', async () => {
+    FakeAuthMiddleware.SetUser('test-uid');
+
+    const createResponse = await request(app.getHttpServer())
+      .post('/quiz')
+      .send({ title: 'Initial Title' })
+      .expect(201);
+
+    const quizId = createResponse.header.location.split('/').pop();
+
+    await request(app.getHttpServer())
+      .patch(`/quiz/${quizId}`)
+      .send([{ op: 'remove', path: '/title' }])
+      .expect(400);
   });
 
 });
