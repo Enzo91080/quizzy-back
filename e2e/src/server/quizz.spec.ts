@@ -13,7 +13,7 @@ describe('QuizzController (e2e)', () => {
   const credentials = {
     email: 'aniss@exemple.com',
     password: '123456',
-    returnSecureToken: true,
+    returnSecureToken: true, 
   };
 
   const headers = () => ({
@@ -21,6 +21,7 @@ describe('QuizzController (e2e)', () => {
   });
 
   beforeAll(async () => {
+
     // Authentification Firebase
     const { data: authData } = await axios.post(firebaseAuthUrl, credentials);
     authToken = authData.idToken;
@@ -136,12 +137,13 @@ describe('QuizzController (e2e)', () => {
   it('POST /quiz - should create a new quiz and return a Location header (issue 6)', async () => {
     const res = await axios.post(
       baseUrl,
-      { title: 'Mariam', description: 'Mariam Quizz' },
+      { title: 'Test E2E', description: 'Description for Test' },
       { headers: headers() }
     );
 
     expect(res.status).toBe(201);
     expect(res.headers).toHaveProperty('location');
+    expect(res.data).toBe(''); // ajout de vérification 
   });
 
   // test la recuperation de l'id d'une question et modification d'une question (issue 11)
@@ -166,6 +168,30 @@ describe('QuizzController (e2e)', () => {
 
   // test l'execution d'un quiz (issue 14)
   it('POST /quiz/:id/start - should start a quiz execution and return location', async () => {
+
+    await expect( // ajout de la vérification des erreurs 404
+      axios.post(`${baseUrl}/toto/start`, null, { headers: headers() })
+    ).rejects.toMatchObject({
+      response: {
+        status: 404,
+      },
+    });
+
+    const incompleteQuiz = await axios.post( // ajout de la vérification des erreurs 400
+      baseUrl,
+      { title: 'Quiz incomplet', description: 'Pas de questions' },
+      { headers: headers() }
+    );
+    const incompleteQuizId = incompleteQuiz.headers.location.split('/').pop();
+    
+    await expect(
+      axios.post(`${baseUrl}/${incompleteQuizId}/start`, null, { headers: headers() })
+    ).rejects.toMatchObject({
+      response: {
+        status: 400,
+      },
+    });
+
     const quizResponse = await axios.post(
       baseUrl,
       { title: 'Quiz à démarrer', description: 'Startable quiz' },
@@ -191,6 +217,7 @@ describe('QuizzController (e2e)', () => {
     });
 
     expect(startRes.status).toBe(201);
+    expect(startRes.data).toBe(''); // ajout de vérification
     expect(startRes.headers).toHaveProperty('location');
     expect(startRes.headers.location).toMatch(/\/execution\//);
   });
