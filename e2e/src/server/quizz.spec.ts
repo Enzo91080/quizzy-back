@@ -13,7 +13,7 @@ describe('QuizzController (e2e)', () => {
   const credentials = {
     email: 'aniss@exemple.com',
     password: '123456',
-    returnSecureToken: true,
+    returnSecureToken: true, 
   };
 
   const headers = () => ({
@@ -21,6 +21,7 @@ describe('QuizzController (e2e)', () => {
   });
 
   beforeAll(async () => {
+
     // Authentification Firebase
     const { data: authData } = await axios.post(firebaseAuthUrl, credentials);
     authToken = authData.idToken;
@@ -136,12 +137,13 @@ describe('QuizzController (e2e)', () => {
   it('POST /quiz - should create a new quiz and return a Location header (issue 6)', async () => {
     const res = await axios.post(
       baseUrl,
-      { title: 'Mariam', description: 'Mariam Quizz' },
+      { title: 'Test E2E', description: 'Description for Test' },
       { headers: headers() }
     );
 
     expect(res.status).toBe(201);
     expect(res.headers).toHaveProperty('location');
+    expect(res.data).toBe(''); // ajout de vérification 
   });
 
   // test la recuperation de l'id d'une question et modification d'une question (issue 11)
